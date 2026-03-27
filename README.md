@@ -8,13 +8,19 @@
 
 ServiceTitan CLI brings customer, job, invoice, dispatch, reporting, and operational intelligence workflows into a single `st` binary. It is built for developers, operators, and AI agents that need clean output, secure auth, fast scripting, and a reliable escape hatch when the named commands do not cover a niche endpoint yet.
 
-Highlights:
+<p align="center">
+  <img src="demo.gif" alt="ServiceTitan CLI Demo" width="800">
+</p>
 
-- Secure profile-based auth with credentials stored outside the config file.
-- Human-friendly tables by default, with JSON and CSV when you need to pipe or export.
-- Safe write operations, including raw API mutations, with confirmation prompts and `--dry-run`.
-- An intelligence layer for revenue rollups and daily ops snapshots.
-- Agent-friendly compact output with `ST_AGENT_MODE=1`.
+## Why
+
+ServiceTitan has no official CLI. The REST API is powerful but requires manual token management, pagination handling, and response parsing. This CLI:
+
+- Handles OAuth 2.0 authentication with secure OS keychain storage
+- Paginates automatically with `--all`
+- Formats output as tables, JSON, or CSV
+- Provides intelligence commands that combine multiple API calls into operational insights
+- Supports AI agent workflows with compact structured output
 
 ## Requirements
 
@@ -89,9 +95,39 @@ Optional but useful on day one:
 st completion install
 ```
 
-## Commands
+## Command Overview
 
 Every command supports `--profile`, `--output table|json|csv`, `--compact`, and `--no-color`. Most list commands also support `--limit`, `--page`, `--fields`, and `--all` for autopagination.
+
+| Command Group | Description |
+|--------------|-------------|
+| `st auth` | Login, logout, switch profiles, print token, whoami |
+| `st customers` | List, get, create, update customers and contacts |
+| `st jobs` | Book, list, get, update, cancel, and complete jobs |
+| `st invoices` | List and get invoice records |
+| `st estimates` | List, get, sell, and unsell estimates |
+| `st leads` | List, get, convert, and dismiss leads |
+| `st bookings` | List, get, accept, and dismiss booking requests |
+| `st memberships` | List memberships, types, and recurring services |
+| `st appointments` | List and get job appointments |
+| `st dispatch` | View dispatch board, capacity, teams, zones, and assign technicians |
+| `st techs` | List and get technician profiles |
+| `st employees` | List and get employee records |
+| `st locations` | List, get, create, and update service locations |
+| `st pricebook` | Browse services, materials, equipment, and categories |
+| `st reporting` | List and run ServiceTitan reports |
+| `st payroll` | View payrolls, gross pay, timesheets, and activity codes |
+| `st timesheets` | List technician timesheets and activity types |
+| `st calls` | Browse telecom call records |
+| `st inventory` | View purchase orders, trucks, vendors, and warehouses |
+| `st business-units` | List and get business unit records |
+| `st job-types` | List and get job type definitions |
+| `st revenue` | Revenue rollup with period shortcuts (day/week/month/year/ytd) |
+| `st snapshot` | Daily ops briefing — jobs, revenue MTD, pipeline at a glance |
+| `st api` | Raw API access (GET/POST/PUT/DELETE) with full auth and output rendering |
+| `st completion` | Install shell tab completion for bash, zsh, or fish |
+
+## Commands
 
 ### auth
 
@@ -694,51 +730,46 @@ $ st completion install --shell zsh
 ✓ Installed zsh completion at ~/.zshrc
 ```
 
-## Intelligence Layer
+## For AI Agents
 
-The named intelligence commands exist for the questions people actually ask every day:
+The CLI includes first-class support for AI agent consumption:
 
-- `st revenue --period ytd` answers, "How much revenue have we booked year to date?"
-- `st snapshot` answers, "What does the business look like right now?"
+```bash
+# Enable compact output
+export ST_AGENT_MODE=1
 
-That matters for human operators, but it matters even more for AI agents. A generic MCP integration often needs large tool schemas, endpoint descriptions, and follow-up discovery calls before the model can answer a simple ops question. The CLI avoids that overhead by pushing the business question into the command name itself.
+# Get revenue data as JSON
+st revenue --from 2025-01-01 --to 2025-12-31 --json
 
-Example:
+# Daily ops snapshot
+st snapshot --json
+
+# Pipe to your agent
+st customers list --all --json | your-agent process
+```
+
+The intelligence layer exists to minimize overhead for agents. A generic MCP integration often needs large tool schemas, endpoint descriptions, and follow-up discovery calls before the model can answer a simple ops question. The CLI avoids that by pushing the business question into the command name itself.
 
 ```bash
 $ st revenue --period ytd --compact
 {"avg_job_value":802.51,"from":"2026-01-01","period":"ytd","to":"2026-03-26","total_jobs":2316,"total_revenue":1850603.16}
-```
 
-```bash
 $ st snapshot --compact
 {"date":"2026-03-26","jobs_today":22,"jobs_this_week":87,"revenue_mtd":248421.72,"open_estimates":14,"active_memberships":1287,"open_leads":7}
 ```
 
-For agent workflows, those payloads are effectively zero-schema output:
+These payloads are zero-schema output:
 
-- No endpoint discovery round-trip.
-- No large tool definition injected into the prompt.
-- No empty arrays, null-heavy objects, or audit metadata when `--compact` or `ST_AGENT_MODE=1` is enabled.
-- A single command produces exactly the slice of business context an agent needs.
-
-If you are comparing shell access to an MCP server, this is the tradeoff: fewer schema tokens, less orchestration overhead, and a much tighter prompt footprint.
-
-## Agent Mode
-
-Set `ST_AGENT_MODE=1` to trim output for scripts and agents. For list and detail commands, pair it with `--output json` for compact machine-readable payloads. For `st revenue` and `st snapshot`, compact mode already emits single-line JSON.
-
-```bash
-export ST_AGENT_MODE=1
-```
+- No endpoint discovery round-trip
+- No large tool definition injected into the prompt
+- No empty arrays, null-heavy objects, or audit metadata when `--compact` or `ST_AGENT_MODE=1` is set
+- A single command produces exactly the slice of business context an agent needs
 
 ```bash
 $ st jobs list --status Scheduled --limit 2 --output json | jq '.[].id'
 845102
 845131
-```
 
-```bash
 $ st snapshot --output json | jq '{date, jobs_today, revenue_mtd}'
 {
   "date": "2026-03-26",
@@ -747,11 +778,36 @@ $ st snapshot --output json | jq '{date, jobs_today, revenue_mtd}'
 }
 ```
 
-For one-off calls, use `--compact` without changing your shell environment:
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ST_PROFILE` | Override the active profile | First profile |
+| `ST_OUTPUT` | Default output format: `table`, `json`, or `csv` | `table` |
+| `ST_AGENT_MODE` | Set to `1` for compact JSON output optimized for AI agent consumption | `0` |
+| `ST_TIMEZONE` | IANA timezone for date-aware queries (e.g., `America/New_York`) | System timezone |
+| `ST_NO_COLOR` | Disable colorized terminal output | — |
+| `ST_ENVIRONMENT` | Override stored environment at runtime | — |
+| `ST_TENANT_ID` | Override tenant ID at runtime | — |
+| `ST_APP_KEY` | Override app key at runtime | — |
+| `ST_CONFIG_DIR` | Use a non-default config directory | `~/.config/st` |
+| `ST_CLIENT_ID` | ServiceTitan OAuth client ID (overrides stored credentials) | — |
+| `ST_CLIENT_SECRET` | ServiceTitan OAuth client secret (overrides stored credentials) | — |
+| `ST_TIMEOUT` | Global request timeout in milliseconds | `30000` |
+
+> **Security note:** When `ST_CLIENT_ID` and `ST_CLIENT_SECRET` are set, they take precedence over credentials stored in the OS keychain. Use environment variables for CI/CD pipelines; use `st auth login` for interactive use.
+
+Example overrides:
 
 ```bash
-st customers list --search "martinez" --output json --compact
+ST_PROFILE=acme-int st jobs list --status Scheduled
+ST_OUTPUT=json st customers list --limit 5
+ST_ENVIRONMENT=integration st revenue --period month
 ```
+
+## Architecture / How It Works
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for an overview of the project structure, module layout, auth flow, and output rendering pipeline.
 
 ## Output Formats
 
@@ -817,40 +873,6 @@ Supported environments:
 - `production` for live tenant access.
 - `integration` for sandbox and pre-production workflows.
 
-Environment and runtime overrides:
-
-| Variable | Purpose |
-| --- | --- |
-| `ST_PROFILE` | Override the active profile |
-| `ST_OUTPUT` | Default output format: `table`, `json`, or `csv` |
-| `ST_AGENT_MODE` | Enable compact agent-oriented shaping |
-| `ST_NO_COLOR` | Disable colorized terminal output |
-| `ST_ENVIRONMENT` | Override stored environment at runtime |
-| `ST_TENANT_ID` | Override tenant ID at runtime |
-| `ST_APP_KEY` | Override app key at runtime |
-| `ST_CONFIG_DIR` | Use a non-default config directory |
-
-Examples:
-
-```bash
-ST_PROFILE=acme-int st jobs list --status Scheduled
-ST_OUTPUT=json st customers list --limit 5
-ST_ENVIRONMENT=integration st revenue --period month
-```
-
-## Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `ST_AGENT_MODE` | Set to `1` for compact JSON output optimized for AI agent consumption | `0` |
-| `ST_TIMEZONE` | IANA timezone for date-aware queries (e.g., `America/New_York`) | System timezone |
-| `ST_DEFAULT_PROFILE` | Override the default auth profile without `--profile` flag | First profile |
-| `ST_CLIENT_ID` | ServiceTitan OAuth client ID (overrides stored credentials) | — |
-| `ST_CLIENT_SECRET` | ServiceTitan OAuth client secret (overrides stored credentials) | — |
-| `ST_TIMEOUT` | Global request timeout in milliseconds | `30000` |
-
-> **Security note:** When `ST_CLIENT_ID` and `ST_CLIENT_SECRET` are set, they take precedence over credentials stored in the OS keychain. Use environment variables for CI/CD pipelines; use `st auth login` for interactive use.
-
 ## Contributing
 
 Issues and pull requests are welcome at [github.com/montrellcruse/servicetitan-cli](https://github.com/montrellcruse/servicetitan-cli). If you are working on the CLI locally, the standard validation loop is:
@@ -860,6 +882,12 @@ npm run typecheck
 npm run lint
 npm test
 ```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full contribution guidelines, branch conventions, and commit format.
+
+## Security
+
+For security disclosures, see [SECURITY.md](SECURITY.md).
 
 ## License
 
