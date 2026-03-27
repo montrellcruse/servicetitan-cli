@@ -1,4 +1,4 @@
-import {getNumber, getString} from './data.js'
+import {getPathValue, getString} from './data.js'
 import {resolveDateRange, resolvePeriodDateRange} from './date-ranges.js'
 import {paginate} from './pagination.js'
 import type {RevenuePeriod} from './date-ranges.js'
@@ -57,8 +57,8 @@ export async function getRevenueSummary(
     client,
     '/invoices',
     {
-      createdOnOrAfter: range.from,
-      createdOnOrBefore: range.to,
+      invoiceDateOnOrAfter: range.from,
+      invoiceDateOnOrBefore: range.to,
     },
     {
       all: true,
@@ -69,13 +69,12 @@ export async function getRevenueSummary(
   const activeInvoices = invoices.filter(invoice => {
     const status = getInvoiceStatus(invoice)
     if (status === 'void' || status === 'voided' || status === 'cancelled' || status === 'canceled') return false
-    const total = getNumber(invoice, ['total', 'totalAmount', 'invoiceTotal', 'summary.total']) ?? 0
+    const total = getInvoiceTotal(invoice)
     return total > 0
   })
   const totalRevenue = roundCurrency(
     activeInvoices.reduce(
-      (sum, invoice) =>
-        sum + (getNumber(invoice, ['total', 'totalAmount', 'invoiceTotal', 'summary.total']) ?? 0),
+      (sum, invoice) => sum + getInvoiceTotal(invoice),
       0,
     ),
   )
@@ -99,9 +98,8 @@ export async function getSnapshotSummary(
   const tasks: Record<SnapshotMetricKey, Promise<number>> = {
     active_memberships: countResults(client, '/memberships', {active: true}),
     jobs_this_week: countResults(client, '/jobs', {
-      completedOnOrAfter: weekRange.from,
-      completedOnOrBefore: weekRange.to,
-      jobStatus: 'Completed',
+      scheduledOnOrAfter: weekRange.from,
+      scheduledOnOrBefore: weekRange.to,
     }),
     jobs_today: countResults(client, '/jobs', {
       scheduledOnOrAfter: date,
@@ -172,6 +170,12 @@ function getErrorMessage(error: unknown): string {
 
 function getInvoiceStatus(invoice: UnknownRecord): string {
   return (getString(invoice, ['status']) ?? '').trim().toLowerCase()
+}
+
+function getInvoiceTotal(invoice: UnknownRecord): number {
+  const total = getPathValue(invoice, 'total')
+
+  return parseFloat(typeof total === 'number' || typeof total === 'string' ? String(total) : '0')
 }
 
 function roundCurrency(value: number): number {

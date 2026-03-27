@@ -25,8 +25,8 @@ describe('revenue command', () => {
     )
 
     expect(getSpy).toHaveBeenCalledWith('/invoices', {
-      createdOnOrAfter: '2026-03-01',
-      createdOnOrBefore: '2026-03-26',
+      invoiceDateOnOrAfter: '2026-03-01',
+      invoiceDateOnOrBefore: '2026-03-26',
       page: 1,
       pageSize: 5000,
     })
@@ -67,17 +67,17 @@ function createInvoices() {
     {
       id: 1,
       status: 'Paid',
-      total: 600,
+      total: '600.00',
     },
     {
       id: 2,
       status: 'Void',
-      total: 200,
+      total: '200.00',
     },
     {
       id: 3,
       status: 'Paid',
-      total: 1500,
+      total: '1500.00',
     },
   ]
 }
