@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {afterEach, describe, expect, it, vi} from 'vitest'
 import {AxiosHeaders, type AxiosError} from 'axios'
 
@@ -162,7 +163,7 @@ describe('ServiceTitanClient rate limiting', () => {
     const client = createClient()
     const p = priv(client)
 
-    const err = await p.handleResponseError(create429Error({retryCount: 2})).catch(e => e)
+    const err = await p.handleResponseError(create429Error({retryCount: 2})).catch((e: unknown) => e as Error)
     expect(err).toBeInstanceOf(ServiceTitanApiError)
     expect((err as ServiceTitanApiError).message).toBeTruthy()
     expect((err as ServiceTitanApiError).status).toBe(429)

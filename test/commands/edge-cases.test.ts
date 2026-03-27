@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument */
 import {afterEach, describe, expect, it, vi} from 'vitest'
 
 import CustomersList from '../../src/commands/customers/list.js'
@@ -40,7 +41,7 @@ describe('edge cases', () => {
 
     await CustomersList.run(['--output', 'json'], process.cwd())
 
-    const parsed = JSON.parse(output())
+    const parsed: AnyJson = JSON.parse(output())
     expect(Array.isArray(parsed)).toBe(true)
     expect(parsed).toHaveLength(0)
   })
@@ -277,7 +278,7 @@ describe('edge cases', () => {
     await CustomersList.run(['--output', 'json'], process.cwd())
 
     // Must be valid JSON
-    const parsed = JSON.parse(output())
+    const parsed: AnyJson = JSON.parse(output())
     expect(Array.isArray(parsed)).toBe(true)
     expect(parsed).toHaveLength(1)
     expect(parsed[0].name).toBe('Complex Customer')
@@ -299,7 +300,7 @@ describe('edge cases', () => {
 
     await CustomersList.run(['--output', 'json'], process.cwd())
 
-    const parsed = JSON.parse(output())
+    const parsed: AnyJson = JSON.parse(output())
     expect(parsed).toHaveLength(3)
     expect(parsed.map((c: {name: string}) => c.name)).toEqual(['Alpha', 'Beta', 'Gamma'])
   })
@@ -313,7 +314,7 @@ describe('edge cases', () => {
     const raw = output().trim()
     expect(raw).toBeTruthy()
 
-    const parsed = JSON.parse(raw)
+    const parsed: AnyJson = JSON.parse(raw)
     expect(parsed).toEqual([])
     expect(parsed).not.toBeNull()
   })
@@ -359,7 +360,7 @@ describe('edge cases', () => {
 
     await CustomersList.run(['--output', 'json', '--fields', 'id,name'], process.cwd())
 
-    const parsed = JSON.parse(output())
+    const parsed: AnyJson = JSON.parse(output())
     expect(Array.isArray(parsed)).toBe(true)
     expect(parsed[0]).toHaveProperty('id')
     expect(parsed[0]).toHaveProperty('name')

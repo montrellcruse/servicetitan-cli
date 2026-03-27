@@ -205,7 +205,7 @@ describe('auth error paths', () => {
 
     try {
       const {promptSecret} = await import('../../src/lib/prompts.js')
-      const err = await promptSecret('Client Secret').catch(e => e)
+      const err: unknown = await promptSecret('Client Secret').catch((e: unknown) => e)
       expect((err as Error).message).toContain('ST_CLIENT_ID')
       expect((err as Error).message).toContain('ST_CLIENT_SECRET')
     } finally {

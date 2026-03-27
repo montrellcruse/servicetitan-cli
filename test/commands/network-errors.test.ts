@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {afterEach, describe, expect, it, vi} from 'vitest'
 import {AxiosHeaders, type AxiosError} from 'axios'
 
@@ -96,7 +97,7 @@ describe('ServiceTitanClient network errors', () => {
     const err = await handleError(
       client,
       createNetworkError('ECONNABORTED', 'timeout of 30000ms exceeded'),
-    ).catch(e => e)
+    ).catch((e: unknown) => e as Error)
 
     expect(err).toBeInstanceOf(ServiceTitanApiError)
     expect((err as ServiceTitanApiError).message).toMatch(/timeout/i)
@@ -109,7 +110,7 @@ describe('ServiceTitanClient network errors', () => {
     const err = await handleError(
       client,
       createNetworkError('ECONNABORTED', 'timeout of 30000ms exceeded'),
-    ).catch(e => e)
+    ).catch((e: unknown) => e as Error)
 
     expect(err).toBeInstanceOf(ServiceTitanApiError)
     expect((err as ServiceTitanApiError).message).toContain('30000ms')
@@ -123,7 +124,7 @@ describe('ServiceTitanClient network errors', () => {
     const err = await handleError(
       client,
       createNetworkError('ENOTFOUND', 'getaddrinfo ENOTFOUND api-integration.servicetitan.io'),
-    ).catch(e => e)
+    ).catch((e: unknown) => e as Error)
 
     expect(err).toBeInstanceOf(ServiceTitanApiError)
     expect((err as ServiceTitanApiError).message).toMatch(/ENOTFOUND|getaddrinfo/i)
@@ -138,7 +139,7 @@ describe('ServiceTitanClient network errors', () => {
     const err = await handleError(
       client,
       createNetworkError('ECONNREFUSED', 'connect ECONNREFUSED 52.42.1.1:443'),
-    ).catch(e => e)
+    ).catch((e: unknown) => e as Error)
 
     expect(err).toBeInstanceOf(ServiceTitanApiError)
     expect((err as ServiceTitanApiError).message).toMatch(/ECONNREFUSED|connect/i)
@@ -156,7 +157,7 @@ describe('ServiceTitanClient network errors', () => {
         'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
         'unable to verify the first certificate',
       ),
-    ).catch(e => e)
+    ).catch((e: unknown) => e as Error)
 
     expect(err).toBeInstanceOf(ServiceTitanApiError)
     expect((err as ServiceTitanApiError).message).toMatch(/certificate|verify/i)
@@ -170,7 +171,7 @@ describe('ServiceTitanClient network errors', () => {
     const err = await handleError(
       client,
       createHttpError(502, 'Bad Gateway', '<html><body>502 Bad Gateway</body></html>'),
-    ).catch(e => e)
+    ).catch((e: unknown) => e as Error)
 
     expect(err).toBeInstanceOf(ServiceTitanApiError)
     expect((err as ServiceTitanApiError).status).toBe(502)
@@ -185,7 +186,7 @@ describe('ServiceTitanClient network errors', () => {
     const err = await handleError(
       client,
       createHttpError(503, 'Service Unavailable', '', 'Request failed with status code 503'),
-    ).catch(e => e)
+    ).catch((e: unknown) => e as Error)
 
     expect(err).toBeInstanceOf(ServiceTitanApiError)
     // Empty string branch falls through to error.message
@@ -199,7 +200,7 @@ describe('ServiceTitanClient network errors', () => {
     const err = await handleError(
       client,
       createHttpError(400, 'Bad Request', {message: 'Invalid query parameter: pageSize must be positive'}),
-    ).catch(e => e)
+    ).catch((e: unknown) => e as Error)
 
     expect(err).toBeInstanceOf(ServiceTitanApiError)
     expect((err as ServiceTitanApiError).message).toContain('pageSize must be positive')
@@ -212,7 +213,7 @@ describe('ServiceTitanClient network errors', () => {
     const err = await handleError(
       client,
       createHttpError(422, 'Unprocessable Entity', {error: 'Validation failed for field tenantId'}),
-    ).catch(e => e)
+    ).catch((e: unknown) => e as Error)
 
     expect(err).toBeInstanceOf(ServiceTitanApiError)
     expect((err as ServiceTitanApiError).message).toContain('Validation failed')
@@ -226,7 +227,7 @@ describe('ServiceTitanClient network errors', () => {
     const err = await handleError(
       client,
       createNetworkError('ECONNREFUSED', 'connect ECONNREFUSED'),
-    ).catch(e => e)
+    ).catch((e: unknown) => e as Error)
 
     expect(err).toBeInstanceOf(ServiceTitanApiError)
     expect((err as ServiceTitanApiError).path).toContain('/customers')
@@ -244,7 +245,7 @@ describe('ServiceTitanClient network errors', () => {
       toJSON: () => ({}),
     } as unknown as AxiosError
 
-    const err = await handleError(client, noConfigError).catch(e => e)
+    const err = await handleError(client, noConfigError).catch((e: unknown) => e as Error)
     expect(err).toBeInstanceOf(ServiceTitanApiError)
     expect((err as ServiceTitanApiError).path).toBe('unknown path')
   })
@@ -269,7 +270,7 @@ describe('ServiceTitanClient network errors', () => {
     // This test verifies the error wrapping still works end-to-end when accessed via handleError.
 
     const networkErr = createNetworkError('ECONNRESET', 'socket hang up')
-    const err = await handleError(client, networkErr).catch(e => e)
+    const err = await handleError(client, networkErr).catch((e: unknown) => e as Error)
 
     expect(err).toBeInstanceOf(ServiceTitanApiError)
     expect((err as ServiceTitanApiError).message).toContain('socket hang up')
