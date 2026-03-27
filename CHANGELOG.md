@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-03-27
+
+### Fixed
+- `jobs list` — switched API parameter from `status` to `jobStatus` (ST API silently ignored `status`, returning all statuses including Canceled)
+- `jobs list --completed-from/to` — now defaults to `jobStatus=Completed` filter; Canceled jobs with a `completedOn` date no longer inflate counts
+- Snapshot intelligence — `jobs_today` and `jobs_this_week` now explicitly filter `jobStatus=Completed`; previous counts included Canceled jobs (e.g. 9 → 5 jobs today)
+- Test assertion in `jobs.test.ts` updated to expect `jobStatus` param
+- Stress-tested against BigQuery ground truth: jobs today 5/5 ✅, jobs this week 85/85 ✅, revenue MTD $319,139.11 ✅
+
+## [0.3.2] - 2026-03-27
+
+### Fixed
+- Active memberships count — changed filter from `active: true` (billing flag, includes Expired memberships) to `status: 'Active'` (correct lifecycle status filter); count corrected from 9,108 → 1,572
+- Open estimates count — removed `MAX_COUNT_RECORDS = 10,000` hard cap in `countResults()`; full pagination now returns accurate count (34,385 vs previous capped 10,000)
+- Homebrew formula updated from v0.1.0 → v0.3.1 with correct SHA256 (`99cb9b78ce67a39f0f06cd3c64f154dc78dfad5bbcc432ed0ee091eea6389344`)
+- `bin` entry in `package.json` — removed leading `./` from `./bin/run.js` to resolve npm publish validation warning
+
 ## [0.2.3] - 2026-03-26
 
 ### Added
