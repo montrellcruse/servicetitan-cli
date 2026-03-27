@@ -2,6 +2,7 @@ import {afterEach, describe, expect, it, vi} from 'vitest'
 
 import AppointmentsList from '../../src/commands/appointments/list.js'
 import BookingsList from '../../src/commands/bookings/list.js'
+import CallsList from '../../src/commands/calls/list.js'
 import CustomersList from '../../src/commands/customers/list.js'
 import EmployeesList from '../../src/commands/employees/list.js'
 import EstimatesList from '../../src/commands/estimates/list.js'
@@ -41,6 +42,13 @@ const CASES: CommandCase[] = [
     label: 'bookings list',
     params: {page: 2, pageSize: 10, status: undefined},
     path: '/bookings',
+  },
+  {
+    argv: ['--page', '2', '--limit', '10'],
+    command: CallsList,
+    label: 'calls list',
+    params: {from: undefined, page: 2, pageSize: 10, to: undefined},
+    path: '/calls',
   },
   {
     argv: ['--page', '2', '--limit', '10'],
