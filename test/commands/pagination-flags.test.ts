@@ -16,6 +16,7 @@ import PricebookEquipment from '../../src/commands/pricebook/equipment.js'
 import PricebookMaterials from '../../src/commands/pricebook/materials.js'
 import PricebookServices from '../../src/commands/pricebook/services.js'
 import TechsList from '../../src/commands/techs/list.js'
+import TimesheetsList from '../../src/commands/timesheets/list.js'
 import {createTestContext, stripAnsi} from '../helpers.js'
 
 type CommandCase = {
@@ -147,6 +148,13 @@ const CASES: CommandCase[] = [
     label: 'techs list',
     params: {active: undefined, page: 2, pageSize: 10},
     path: '/technicians',
+  },
+  {
+    argv: ['--page', '2', '--limit', '10'],
+    command: TimesheetsList,
+    label: 'timesheets list',
+    params: {from: undefined, page: 2, pageSize: 10, technicianId: undefined, to: undefined},
+    path: '/activities',
   },
 ]
 
