@@ -210,13 +210,11 @@ async function countResults(
     return response.totalCount
   }
 
-  // If no totalCount, paginate with a large page size but cap at 10,000 to avoid
-  // fetching all records (e.g., 57K+ jobs) when the API ignores date filters.
-  // This is a count operation — precision above 10K doesn't matter for snapshots.
-  const MAX_COUNT_RECORDS = 10_000
+  // If no totalCount, paginate with a large page size to get the true count.
+  // Note: Some endpoints (e.g., jobs, estimates) have thousands of records.
+  // Always paginate to completion for accuracy — snapshot metrics must be precise.
   const records = await paginate<UnknownRecord>(client, path, params, {
     all: true,
-    limit: MAX_COUNT_RECORDS,
     pageSize: 5000,
   })
   return records.length

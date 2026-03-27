@@ -1,8 +1,8 @@
 class ServicetitanCli < Formula
   desc "First-party quality CLI for the ServiceTitan API"
   homepage "https://github.com/montrellcruse/servicetitan-cli"
-  url "https://registry.npmjs.org/@rowvyn/servicetitan-cli/-/servicetitan-cli-0.1.0.tgz"
-  sha256 "338648de1ad71f297245a5d854f724500685452cffc085662ef1915dd09d5636"
+  url "https://registry.npmjs.org/@rowvyn/servicetitan-cli/-/servicetitan-cli-0.3.1.tgz"
+  sha256 "99cb9b78ce67a39f0f06cd3c64f154dc78dfad5bbcc432ed0ee091eea6389344"
   license "MIT"
 
   depends_on "node"
@@ -14,6 +14,6 @@ class ServicetitanCli < Formula
 
   test do
     output = shell_output("#{bin}/st --version")
-    assert_match "0.1.0", output
+    assert_match "0.3.1", output
   end
 end
