@@ -6,7 +6,26 @@ import type {PaginatedResponse, UnknownRecord} from './types.js'
 
 interface PaginatedClient {
   get<T>(path: string, params?: Record<string, unknown>): Promise<PaginatedResponse<T>>
+  post?<T>(path: string, body?: unknown, params?: Record<string, unknown>): Promise<T>
 }
+
+/**
+ * Report 175 field indices (Business Unit Dashboard → "Revenue").
+ * This is ST's native revenue calculation and matches the dashboard exactly.
+ * TotalRevenue = CompletedRevenue + NonJobRevenue + AdjustmentRevenue
+ */
+const REPORT_175_FIELD = {
+  Name: 0,
+  CompletedRevenue: 1,
+  OpportunityJobAverage: 2,
+  OpportunityConversionRate: 3,
+  Opportunity: 4,
+  ConvertedJobs: 5,
+  CustomerSatisfaction: 6,
+  AdjustmentRevenue: 7,
+  TotalRevenue: 8,
+  NonJobRevenue: 9,
+} as const
 
 export interface RevenueSummary {
   avg_job_value: number
@@ -53,19 +72,64 @@ export async function getRevenueSummary(
     referenceDate: options.referenceDate,
     to: options.to,
   })
+
+  // Use Report 175 (ST's native reporting engine) for accurate revenue figures.
+  // This matches the ST dashboard exactly — unlike invoice aggregation which
+  // returns all-time records with no server-side date filtering support.
+  if (client.post) {
+    const reportResponse = await client.post<UnknownRecord>(
+      '/report-category/business-unit-dashboard/reports/175/data',
+      {
+        parameters: [
+          {name: 'From', value: range.from},
+          {name: 'To', value: range.to},
+        ],
+      },
+    )
+
+    const reportData = (reportResponse as {data?: unknown}).data
+    const rows: unknown[][] = Array.isArray(reportData)
+      ? (reportData as unknown[]).filter(Array.isArray) as unknown[][]
+      : []
+
+    let totalRevenue = 0
+    let totalJobs = 0
+
+    for (const row of rows) {
+      const revenueRaw = row[REPORT_175_FIELD.TotalRevenue]
+      const jobsRaw = row[REPORT_175_FIELD.ConvertedJobs]
+      const rowRevenue = parseFloat(typeof revenueRaw === 'number' || typeof revenueRaw === 'string' ? String(revenueRaw) : '0') || 0
+      const rowJobs = parseInt(typeof jobsRaw === 'number' || typeof jobsRaw === 'string' ? String(jobsRaw) : '0', 10) || 0
+      if (rowRevenue === 0 && rowJobs === 0) continue
+      totalRevenue += rowRevenue
+      totalJobs += rowJobs
+    }
+
+    totalRevenue = roundCurrency(totalRevenue)
+
+    return {
+      avg_job_value: totalJobs > 0 ? roundCurrency(totalRevenue / totalJobs) : 0,
+      from: range.from,
+      period,
+      to: range.to,
+      total_jobs: totalJobs,
+      total_revenue: totalRevenue,
+    }
+  }
+
+  // Fallback: invoice aggregation (for test contexts without post() support)
   const invoices = await paginate<UnknownRecord>(
     client,
     '/invoices',
     {
-      invoiceDateOnOrAfter: range.from,
-      invoiceDateOnOrBefore: range.to,
+      createdOnOrAfter: range.from,
+      createdOnOrBefore: range.to,
     },
     {
       all: true,
-      pageSize: 5000,
+      pageSize: 500,
     },
   )
-  // Filter out void/cancelled invoices AND zero-value invoices (ST returns $0 jobs)
   const activeInvoices = invoices.filter(invoice => {
     const status = getInvoiceStatus(invoice)
     if (status === 'void' || status === 'voided' || status === 'cancelled' || status === 'canceled') return false
@@ -73,10 +137,7 @@ export async function getRevenueSummary(
     return total > 0
   })
   const totalRevenue = roundCurrency(
-    activeInvoices.reduce(
-      (sum, invoice) => sum + getInvoiceTotal(invoice),
-      0,
-    ),
+    activeInvoices.reduce((sum, invoice) => sum + getInvoiceTotal(invoice), 0),
   )
   const totalJobs = activeInvoices.length
 

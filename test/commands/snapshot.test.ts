@@ -13,17 +13,6 @@ describe('snapshot summary', () => {
         return Promise.resolve({data: [], totalCount: 47})
       }
 
-      if (path === '/invoices') {
-        return Promise.resolve({
-          data: [
-            {id: 1, status: 'Paid', total: '100.00'},
-            {id: 2, status: 'Void', total: '50.00'},
-            {id: 3, status: 'Paid', total: '200.00'},
-          ],
-          hasMore: false,
-        })
-      }
-
       if (path === '/estimates') {
         return Promise.resolve({data: [], totalCount: 8})
       }
@@ -38,8 +27,17 @@ describe('snapshot summary', () => {
 
       return Promise.reject(new Error(`Unexpected path: ${path}`))
     })
-    const client = {get}
 
+    // Report 175 POST response for revenue_mtd
+    const post = vi.fn().mockResolvedValue({
+      data: [
+        // [Name, CompletedRev, OppAvg, OppConvRate, Opp, ConvertedJobs, CustSat, AdjRev, TotalRevenue, NonJobRev]
+        ['HVAC - Service', 200, 200, 1.0, 1, 1, 4.8, 0, 300, 0],
+      ],
+      hasMore: false,
+    })
+
+    const client = {get, post}
     const summary = await getSnapshotSummary(client, '2026-03-26')
 
     expect(summary).toEqual({
@@ -71,11 +69,14 @@ describe('snapshot summary', () => {
       page: 1,
       pageSize: 1,
     })
-    expect(get).toHaveBeenCalledWith('/invoices', {
-      invoiceDateOnOrAfter: '2026-03-01',
-      invoiceDateOnOrBefore: '2026-03-26',
-      page: 1,
-      pageSize: 5000,
-    })
+    expect(post).toHaveBeenCalledWith(
+      '/report-category/business-unit-dashboard/reports/175/data',
+      {
+        parameters: [
+          {name: 'From', value: '2026-03-01'},
+          {name: 'To', value: '2026-03-26'},
+        ],
+      },
+    )
   })
 })
