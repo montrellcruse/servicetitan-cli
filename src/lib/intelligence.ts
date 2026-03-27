@@ -157,7 +157,7 @@ export async function getSnapshotSummary(
 ): Promise<SnapshotSummary> {
   const weekRange = resolvePeriodDateRange('week', date)
   const tasks: Record<SnapshotMetricKey, Promise<number>> = {
-    active_memberships: countResults(client, '/memberships', {active: true}),
+    active_memberships: countResults(client, '/memberships', {status: 'Active'}),
     jobs_this_week: countResults(client, '/jobs', {
       completedOnOrAfter: weekRange.from,
       completedOnOrBefore: weekRange.to,

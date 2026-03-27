@@ -52,7 +52,7 @@ describe('snapshot summary', () => {
       revenue_mtd: 300,
     })
     expect(get).toHaveBeenCalledWith('/memberships', {
-      active: true,
+      status: 'Active',
       page: 1,
       pageSize: 1,
     })
