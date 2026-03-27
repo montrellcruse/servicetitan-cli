@@ -23,10 +23,10 @@ describe('calls commands', () => {
     await CallsList.run([], process.cwd())
 
     expect(getSpy).toHaveBeenCalledWith('/calls', {
-      from: undefined,
+      createdBefore: undefined,
+      createdOnOrAfter: undefined,
       page: 1,
       pageSize: 50,
-      to: undefined,
     })
     const rendered = stripAnsi(output())
     expect(rendered).toContain('Completed')

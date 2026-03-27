@@ -1,7 +1,7 @@
 import {Flags} from '@oclif/core'
 
 import {BaseCommand, baseFlags} from '../../lib/base-command.js'
-import {assertDateString} from '../../lib/date-ranges.js'
+import {assertDateString, toSTDateTime, toSTDateTimeExclusiveEnd} from '../../lib/date-ranges.js'
 import {toJobSummary} from '../../lib/entities.js'
 import {paginate} from '../../lib/pagination.js'
 import type {UnknownRecord} from '../../lib/types.js'
@@ -12,6 +12,8 @@ export default class JobsList extends BaseCommand {
   public static override examples = [
     '<%= config.bin %> jobs list',
     '<%= config.bin %> jobs list --status Scheduled,InProgress --date 2026-03-26',
+    '<%= config.bin %> jobs list --from 2026-03-01 --to 2026-03-31',
+    '<%= config.bin %> jobs list --completed-from 2026-03-01 --completed-to 2026-03-31',
     '<%= config.bin %> jobs list --fields id,status,customer,total --output csv',
   ]
 
@@ -21,10 +23,19 @@ export default class JobsList extends BaseCommand {
       description: 'Comma-separated job statuses',
     }),
     date: Flags.string({
-      description: 'Exact date to filter by (YYYY-MM-DD)',
+      description: 'Exact creation date to filter by (YYYY-MM-DD)',
     }),
-    'date-range': Flags.string({
-      description: 'Date range to filter by (YYYY-MM-DD..YYYY-MM-DD)',
+    from: Flags.string({
+      description: 'Created-on-or-after date (YYYY-MM-DD)',
+    }),
+    to: Flags.string({
+      description: 'Created-before date, inclusive (YYYY-MM-DD)',
+    }),
+    'completed-from': Flags.string({
+      description: 'Completed-on-or-after date (YYYY-MM-DD)',
+    }),
+    'completed-to': Flags.string({
+      description: 'Completed-before date, inclusive (YYYY-MM-DD)',
     }),
     page: Flags.integer({
       description: 'Page number to fetch (1-based)',
@@ -44,28 +55,54 @@ export default class JobsList extends BaseCommand {
     const {flags} = await this.parse(JobsList)
     await this.initializeRuntime(flags)
     const statusValue = typeof flags.status === 'string' ? flags.status : undefined
-    const dateValue =
-      typeof flags.date === 'string' ? assertDateString(flags.date, 'Date') : undefined
-    const dateRangeValue =
-      typeof flags['date-range'] === 'string' ? flags['date-range'] : undefined
-    const {from, to} = parseDateRange(dateRangeValue)
+
+    // Single-day --date sets a full-day range
+    let createdOnOrAfter: string | undefined
+    let createdBefore: string | undefined
+
+    if (flags.date) {
+      const d = assertDateString(flags.date, 'Date')
+      createdOnOrAfter = toSTDateTime(d)
+      createdBefore = toSTDateTimeExclusiveEnd(d)
+    } else {
+      if (flags.from) {
+        createdOnOrAfter = toSTDateTime(assertDateString(flags.from, 'From date'))
+      }
+
+      if (flags.to) {
+        createdBefore = toSTDateTimeExclusiveEnd(assertDateString(flags.to, 'To date'))
+      }
+    }
+
+    let completedOnOrAfter: string | undefined
+    let completedBefore: string | undefined
+
+    if (flags['completed-from']) {
+      completedOnOrAfter = toSTDateTime(assertDateString(flags['completed-from'], 'Completed from date'))
+    }
+
+    if (flags['completed-to']) {
+      completedBefore = toSTDateTimeExclusiveEnd(assertDateString(flags['completed-to'], 'Completed to date'))
+    }
+
     const effectiveLimit = flags.all ? flags.limit : flags.limit ?? 50
 
     const jobs = await paginate<UnknownRecord>(
       this.requireClient(),
       '/jobs',
       {
+        completedBefore,
+        completedOnOrAfter,
+        createdBefore,
+        createdOnOrAfter,
+        page: flags.page,
         status: statusValue
           ? statusValue
               .split(',')
-              .map((status: string) => status.trim())
+              .map((s: string) => s.trim())
               .filter(Boolean)
               .join(',')
           : undefined,
-        date: dateValue,
-        from,
-        page: flags.page,
-        to,
       },
       {
         all: flags.all,
@@ -79,25 +116,4 @@ export default class JobsList extends BaseCommand {
       fields: this.parseFields(flags.fields),
     })
   }
-}
-
-function parseDateRange(value: string | undefined): {from?: string; to?: string} {
-  if (!value) {
-    return {}
-  }
-
-  const [rawFrom, rawTo] = value.split('..')
-
-  if (!rawFrom || !rawTo) {
-    throw new Error('Date range must look like YYYY-MM-DD..YYYY-MM-DD.')
-  }
-
-  const from = assertDateString(rawFrom, 'From date')
-  const to = assertDateString(rawTo, 'To date')
-
-  if (from > to) {
-    throw new Error('From date must be on or before the to date.')
-  }
-
-  return {from, to}
 }

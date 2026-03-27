@@ -1,7 +1,7 @@
 import {Flags} from '@oclif/core'
 
 import {BaseCommand, baseFlags} from '../../lib/base-command.js'
-import {assertDateString, getTodayDate} from '../../lib/date-ranges.js'
+import {assertDateString, getTodayDate, toSTDateTime, toSTDateTimeExclusiveEnd} from '../../lib/date-ranges.js'
 import {toAppointmentAssignmentSummary} from '../../lib/entities.js'
 import {extractResponseRecords} from '../../lib/api.js'
 
@@ -29,7 +29,8 @@ export default class DispatchBoard extends BaseCommand {
     await this.initializeRuntime(flags)
     const date = assertDateString(flags.date ?? getTodayDate(), 'Date')
     const response = await this.requireClient().get<unknown>('/appointment-assignments', {
-      date,
+      createdBefore: toSTDateTimeExclusiveEnd(date),
+      createdOnOrAfter: toSTDateTime(date),
       technicianId: flags.tech,
     })
     const assignments = extractResponseRecords(response)

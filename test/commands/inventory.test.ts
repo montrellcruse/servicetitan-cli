@@ -24,9 +24,9 @@ describe('inventory commands', () => {
     await InventoryPurchaseOrders.run(['--vendor', '17', '--status', 'Open'], process.cwd())
 
     expect(getSpy).toHaveBeenCalledWith('/purchase-orders', {
-      from: undefined,
+      createdBefore: undefined,
+      createdOnOrAfter: undefined,
       status: 'Open',
-      to: undefined,
       vendorId: 17,
     })
     const rendered = stripAnsi(output())

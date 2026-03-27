@@ -25,9 +25,9 @@ describe('payroll commands', () => {
 
     expect(getSpy).toHaveBeenCalledWith('/payrolls', {
       employeeId: 58,
-      from: undefined,
+      endedOnOrBefore: undefined,
+      startedOnOrAfter: undefined,
       technicianId: 72,
-      to: undefined,
     })
     const rendered = stripAnsi(output())
     expect(rendered).toContain('Ava Thompson')
@@ -47,8 +47,8 @@ describe('payroll commands', () => {
     await PayrollTimesheets.run([], process.cwd())
 
     expect(getSpy).toHaveBeenCalledWith('/jobs/timesheets', {
-      from: undefined,
-      to: undefined,
+      createdBefore: undefined,
+      createdOnOrAfter: undefined,
     })
     const rendered = stripAnsi(output())
     expect(rendered).toContain('Dispatch')
@@ -74,8 +74,8 @@ describe('payroll commands', () => {
     await PayrollGrossPay.run([], process.cwd())
 
     expect(getSpy).toHaveBeenCalledWith('/gross-pay-items', {
-      from: undefined,
-      to: undefined,
+      dateOnOrAfter: undefined,
+      dateOnOrBefore: undefined,
     })
     const rendered = stripAnsi(output())
     expect(rendered).toContain('Bonus')

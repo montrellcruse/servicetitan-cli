@@ -2,7 +2,7 @@ import {Flags} from '@oclif/core'
 
 import {extractResponseRecords} from '../../lib/api.js'
 import {BaseCommand, baseFlags} from '../../lib/base-command.js'
-import {resolveOptionalDateRange} from '../../lib/date-ranges.js'
+import {assertDateString, toSTDateTime, toSTDateTimeExclusiveEnd} from '../../lib/date-ranges.js'
 import {toTimesheetSummary} from '../../lib/entities.js'
 
 export default class PayrollTimesheets extends BaseCommand {
@@ -11,23 +11,25 @@ export default class PayrollTimesheets extends BaseCommand {
   public static override flags = {
     ...baseFlags,
     from: Flags.string({
-      description: 'Start date filter (YYYY-MM-DD)',
+      description: 'Created-on-or-after date (YYYY-MM-DD)',
     }),
     to: Flags.string({
-      description: 'End date filter (YYYY-MM-DD)',
+      description: 'Created-before date, inclusive (YYYY-MM-DD)',
     }),
   }
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(PayrollTimesheets)
     await this.initializeRuntime(flags)
-    const {from, to} = resolveOptionalDateRange({
-      from: flags.from,
-      to: flags.to,
-    })
+    const createdOnOrAfter = flags.from
+      ? toSTDateTime(assertDateString(flags.from, 'From date'))
+      : undefined
+    const createdBefore = flags.to
+      ? toSTDateTimeExclusiveEnd(assertDateString(flags.to, 'To date'))
+      : undefined
     const response = await this.requireClient().get<unknown>('/jobs/timesheets', {
-      from,
-      to,
+      createdBefore,
+      createdOnOrAfter,
     })
     const timesheets = extractResponseRecords(response)
 

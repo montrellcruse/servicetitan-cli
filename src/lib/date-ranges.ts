@@ -102,6 +102,30 @@ export function assertDateString(value: string, label = 'Date'): string {
   return value
 }
 
+/**
+ * Convert a YYYY-MM-DD date string to an ISO 8601 datetime string in UTC,
+ * appending T00:00:00Z. Used to build the `createdOnOrAfter`-style params
+ * the ServiceTitan API expects (it ignores plain date strings for these
+ * fields and silently returns all records).
+ */
+export function toSTDateTime(date: string): string {
+  assertDateString(date)
+  return `${date}T00:00:00Z`
+}
+
+/**
+ * Returns the start of the day AFTER the given date as a UTC datetime string.
+ * Useful for building exclusive-end `createdBefore` params so that the
+ * supplied date is fully included in the result set.
+ *
+ * e.g. toSTDateTimeExclusiveEnd('2026-03-26') → '2026-03-27T00:00:00Z'
+ */
+export function toSTDateTimeExclusiveEnd(date: string): string {
+  const d = parseDate(date)
+  const next = new Date(d.getTime() + DAY_MS)
+  return `${formatUtcDate(next)}T00:00:00Z`
+}
+
 export function formatLongDate(value: string): string {
   const date = parseDate(value)
   return new Intl.DateTimeFormat('en-US', {

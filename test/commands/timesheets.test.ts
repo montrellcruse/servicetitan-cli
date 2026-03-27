@@ -23,11 +23,11 @@ describe('timesheets commands', () => {
     await TimesheetsList.run(['--technician', '72'], process.cwd())
 
     expect(getSpy).toHaveBeenCalledWith('/activities', {
-      from: undefined,
+      createdBefore: undefined,
+      createdOnOrAfter: undefined,
       page: 1,
       pageSize: 50,
       technicianId: 72,
-      to: undefined,
     })
     const rendered = stripAnsi(output())
     expect(rendered).toContain('Dispatch')

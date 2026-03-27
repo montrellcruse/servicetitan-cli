@@ -22,7 +22,8 @@ describe('dispatch commands', () => {
     await DispatchBoard.run(['--date', '2026-03-26'], process.cwd())
 
     expect(getSpy).toHaveBeenCalledWith('/appointment-assignments', {
-      date: '2026-03-26',
+      createdBefore: '2026-03-27T00:00:00Z',
+      createdOnOrAfter: '2026-03-26T00:00:00Z',
       technicianId: undefined,
     })
     const rendered = stripAnsi(output())

@@ -23,12 +23,13 @@ describe('jobs commands', () => {
     await JobsList.run([], process.cwd())
 
     expect(getSpy).toHaveBeenCalledWith('/jobs', {
-      date: undefined,
-      from: undefined,
+      completedBefore: undefined,
+      completedOnOrAfter: undefined,
+      createdBefore: undefined,
+      createdOnOrAfter: undefined,
       page: 1,
       pageSize: 50,
       status: undefined,
-      to: undefined,
     })
     const rendered = stripAnsi(output())
     expect(rendered).toContain('9912')
@@ -53,16 +54,17 @@ describe('jobs commands', () => {
     await JobsList.run(['--status', 'Scheduled'], process.cwd())
 
     expect(getSpy).toHaveBeenCalledWith('/jobs', {
-      date: undefined,
-      from: undefined,
+      completedBefore: undefined,
+      completedOnOrAfter: undefined,
+      createdBefore: undefined,
+      createdOnOrAfter: undefined,
       page: 1,
       pageSize: 50,
       status: 'Scheduled',
-      to: undefined,
     })
   })
 
-  it('translates date-range into from/to filters', async () => {
+  it('maps --from/--to to createdOnOrAfter/createdBefore', async () => {
     const getSpy = vi.fn().mockResolvedValue({
       data: [createListJob()],
       hasMore: false,
@@ -73,15 +75,40 @@ describe('jobs commands', () => {
       },
     })
 
-    await JobsList.run(['--date-range', '2026-03-01..2026-03-31'], process.cwd())
+    await JobsList.run(['--from', '2026-03-01', '--to', '2026-03-31'], process.cwd())
 
     expect(getSpy).toHaveBeenCalledWith('/jobs', {
-      date: undefined,
-      from: '2026-03-01',
+      completedBefore: undefined,
+      completedOnOrAfter: undefined,
+      createdBefore: '2026-04-01T00:00:00Z',
+      createdOnOrAfter: '2026-03-01T00:00:00Z',
       page: 1,
       pageSize: 50,
       status: undefined,
-      to: '2026-03-31',
+    })
+  })
+
+  it('maps --date to a single-day createdOnOrAfter/createdBefore range', async () => {
+    const getSpy = vi.fn().mockResolvedValue({
+      data: [createListJob()],
+      hasMore: false,
+    })
+    createTestContext({
+      client: {
+        get: getSpy,
+      },
+    })
+
+    await JobsList.run(['--date', '2026-03-26'], process.cwd())
+
+    expect(getSpy).toHaveBeenCalledWith('/jobs', {
+      completedBefore: undefined,
+      completedOnOrAfter: undefined,
+      createdBefore: '2026-03-27T00:00:00Z',
+      createdOnOrAfter: '2026-03-26T00:00:00Z',
+      page: 1,
+      pageSize: 50,
+      status: undefined,
     })
   })
 
