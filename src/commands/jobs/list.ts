@@ -96,13 +96,19 @@ export default class JobsList extends BaseCommand {
         createdBefore,
         createdOnOrAfter,
         page: flags.page,
-        status: statusValue
+        // When filtering by completion date without an explicit status, default to
+        // Completed — canceled jobs can have a completedOn date set and would otherwise
+        // appear in results unexpectedly.
+        // NOTE: The ST API jobs endpoint uses 'jobStatus' (not 'status') for filtering.
+        jobStatus: statusValue
           ? statusValue
               .split(',')
               .map((s: string) => s.trim())
               .filter(Boolean)
               .join(',')
-          : undefined,
+          : completedOnOrAfter !== undefined
+            ? 'Completed'
+            : undefined,
       },
       {
         all: flags.all,

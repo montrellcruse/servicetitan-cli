@@ -161,10 +161,12 @@ export async function getSnapshotSummary(
     jobs_this_week: countResults(client, '/jobs', {
       completedOnOrAfter: weekRange.from,
       completedOnOrBefore: weekRange.to,
+      jobStatus: 'Completed',
     }),
     jobs_today: countResults(client, '/jobs', {
       completedOnOrAfter: date,
       completedOnOrBefore: date,
+      jobStatus: 'Completed',
     }),
     open_estimates: countResults(client, '/estimates', {status: 'open'}),
     open_leads: countResults(client, '/leads', {status: 'open'}),

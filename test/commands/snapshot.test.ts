@@ -59,12 +59,14 @@ describe('snapshot summary', () => {
     expect(get).toHaveBeenCalledWith('/jobs', {
       completedOnOrAfter: '2026-03-26',
       completedOnOrBefore: '2026-03-26',
+      jobStatus: 'Completed',
       page: 1,
       pageSize: 1,
     })
     expect(get).toHaveBeenCalledWith('/jobs', {
       completedOnOrAfter: '2026-03-23',
       completedOnOrBefore: '2026-03-29',
+      jobStatus: 'Completed',
       page: 1,
       pageSize: 1,
     })

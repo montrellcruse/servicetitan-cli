@@ -60,7 +60,7 @@ describe('jobs commands', () => {
       createdOnOrAfter: undefined,
       page: 1,
       pageSize: 50,
-      status: 'Scheduled',
+      jobStatus: 'Scheduled',
     })
   })
 
