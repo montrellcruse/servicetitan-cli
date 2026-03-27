@@ -6,11 +6,11 @@ describe('snapshot summary', () => {
   it('aggregates settled results and keeps partial failures', async () => {
     const client = {
       get: vi.fn((path: string, params?: Record<string, unknown>) => {
-        if (path === '/jobs' && params?.status === 'Scheduled,InProgress') {
+        if (path === '/jobs' && params?.jobStatus === 'Scheduled,InProgress') {
           return Promise.resolve({data: [], totalCount: 12})
         }
 
-        if (path === '/jobs' && params?.status === 'Completed') {
+        if (path === '/jobs' && params?.jobStatus === 'Completed') {
           return Promise.resolve({data: [], totalCount: 47})
         }
 

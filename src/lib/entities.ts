@@ -2,11 +2,21 @@ import {getBoolean, getNumber, getPathValue, getString} from './data.js'
 import type {UnknownRecord} from './types.js'
 
 export function toCustomerSummary(input: unknown): UnknownRecord {
+  // ST API: contacts[] array with type 'MobilePhone', 'Phone', 'Email', isDefault: true
+  const contacts = Array.isArray(getPathValue(input, 'contacts')) ? (getPathValue(input, 'contacts') as UnknownRecord[]) : []
+  const phone =
+    (contacts.find((c) => (getString(c, ['type']) === 'MobilePhone' || getString(c, ['type']) === 'Phone') && getBoolean(c, ['isDefault']))?.value as string | undefined) ??
+    (contacts.find((c) => getString(c, ['type']) === 'MobilePhone' || getString(c, ['type']) === 'Phone')?.value as string | undefined) ??
+    getString(input, ['phone', 'phoneNumber', 'mobilePhone', 'homePhone']) ?? ''
+  const email =
+    (contacts.find((c) => getString(c, ['type']) === 'Email' && getBoolean(c, ['isDefault']))?.value as string | undefined) ??
+    (contacts.find((c) => getString(c, ['type']) === 'Email')?.value as string | undefined) ??
+    getString(input, ['email', 'emailAddress']) ?? ''
   return {
     id: getNumber(input, ['id']) ?? getString(input, ['id']) ?? '',
     name: getDisplayName(input),
-    phone: getString(input, ['phone', 'phoneNumber', 'mobilePhone', 'homePhone']) ?? '',
-    email: getString(input, ['email', 'emailAddress']) ?? '',
+    phone,
+    email,
     active: getBoolean(input, ['active', 'isActive']) ?? false,
     created: getString(input, ['createdOn', 'createdAt', 'createdDate']) ?? '',
   }
@@ -23,31 +33,51 @@ export function toCustomerDetail(input: unknown): UnknownRecord {
 }
 
 export function toJobSummary(input: unknown): UnknownRecord {
+  // ST API v2: jobStatus (not status), customerId/jobTypeId are IDs; fall back to nested objects for test fixtures
+  const appointments = Array.isArray(getPathValue(input, 'appointments')) ? (getPathValue(input, 'appointments') as UnknownRecord[]) : []
+  const scheduled =
+    getString(appointments[0], ['start', 'scheduledDate', 'startsOn']) ??
+    getString(input, ['scheduledOn', 'scheduledDate', 'startTime']) ?? ''
+  const customer =
+    getString(input, ['customer.name', 'customerName']) ??
+    String(getNumber(input, ['customerId']) ?? getString(input, ['customerId']) ?? '')
+  const type =
+    getString(input, ['jobType.name', 'jobTypeName']) ??
+    String(getNumber(input, ['jobTypeId']) ?? getString(input, ['jobTypeId']) ?? '')
   return {
     id: getNumber(input, ['id']) ?? getString(input, ['id']) ?? '',
-    status: getString(input, ['status']) ?? '',
-    customer: getString(input, ['customer.name', 'customerName']) ?? '',
-    type: getString(input, ['jobType.name', 'jobTypeName', 'type']) ?? '',
-    scheduled: getString(input, ['scheduledOn', 'scheduledDate', 'startTime']) ?? '',
+    status: getString(input, ['jobStatus', 'status']) ?? '',
+    customer,
+    type,
+    scheduled,
     total: getNumber(input, ['total', 'totalAmount', 'invoice.total']) ?? 0,
   }
 }
 
 export function toJobDetail(input: unknown): UnknownRecord {
+  const businessUnit =
+    getString(input, ['businessUnit.name', 'businessUnitName']) ??
+    String(getNumber(input, ['businessUnitId']) ?? getString(input, ['businessUnitId']) ?? '')
   return {
     ...toJobSummary(input),
     summary: getString(input, ['summary', 'description']) ?? '',
-    businessUnit: getString(input, ['businessUnit.name', 'businessUnitName']) ?? '',
+    businessUnit,
     technician: getString(input, ['technician.name', 'assignedTechnician.name', 'technicianName']) ?? '',
     created: getString(input, ['createdOn', 'createdAt']) ?? '',
   }
 }
 
 export function toInvoiceSummary(input: unknown): UnknownRecord {
+  // ST API: status may be string or nested {value: "..."}
+  const statusRaw = getPathValue(input, 'status')
+  const status = typeof statusRaw === 'string' ? statusRaw : (getString(statusRaw, ['value', 'name']) ?? '')
+  const customer =
+    getString(input, ['customer.name', 'customerName']) ??
+    String(getNumber(input, ['customerId']) ?? getString(input, ['customerId']) ?? '')
   return {
     id: getNumber(input, ['id']) ?? getString(input, ['id']) ?? '',
-    status: getString(input, ['status']) ?? '',
-    customer: getString(input, ['customer.name', 'customerName']) ?? '',
+    status,
+    customer,
     total: getNumber(input, ['total', 'totalAmount', 'invoiceTotal']) ?? 0,
     balance: getNumber(input, ['balance', 'balanceAmount']) ?? 0,
     created: getString(input, ['createdOn', 'createdAt', 'createdDate']) ?? '',
@@ -82,13 +112,22 @@ export function toTechnicianDetail(input: unknown): UnknownRecord {
 }
 
 export function toMembershipSummary(input: unknown): UnknownRecord {
+  // ST API: from/to (not start/end), membershipTypeId (ID), customerId (ID)
+  const statusRaw = getPathValue(input, 'status')
+  const status = typeof statusRaw === 'string' ? statusRaw : (getString(statusRaw, ['value', 'name']) ?? '')
+  const type =
+    getString(input, ['membershipType.name', 'membershipTypeName']) ??
+    String(getNumber(input, ['membershipTypeId']) ?? getString(input, ['membershipTypeId']) ?? '')
+  const customer =
+    getString(input, ['customer.name', 'customerName']) ??
+    String(getNumber(input, ['customerId']) ?? getString(input, ['customerId']) ?? '')
   return {
     id: getIdentifier(input, ['id', 'membershipId']),
-    type: getString(input, ['membershipType.name', 'membershipTypeName', 'type.name', 'type']) ?? '',
-    customer: getString(input, ['customer.name', 'customerName']) ?? '',
-    status: getString(input, ['status']) ?? '',
-    start: getString(input, ['startDate', 'membershipStartDate', 'start']) ?? '',
-    end: getString(input, ['endDate', 'membershipEndDate', 'expirationDate', 'expiresOn']) ?? '',
+    type,
+    customer,
+    status,
+    start: getString(input, ['from', 'startDate', 'membershipStartDate', 'start']) ?? '',
+    end: getString(input, ['to', 'endDate', 'membershipEndDate', 'expirationDate', 'expiresOn']) ?? '',
     recurring: getBoolean(input, ['isRecurring', 'recurring', 'billing.recurring']) ?? false,
   }
 }
@@ -116,11 +155,17 @@ export function toMembershipTypeSummary(input: unknown): UnknownRecord {
 }
 
 export function toEstimateSummary(input: unknown): UnknownRecord {
+  // ST API: status may be nested {value: "..."}, customerId is an ID
+  const statusRaw = getPathValue(input, 'status')
+  const status = typeof statusRaw === 'string' ? statusRaw : (getString(statusRaw, ['value', 'name']) ?? '')
+  const customer =
+    getString(input, ['customer.name', 'customerName']) ??
+    String(getNumber(input, ['customerId']) ?? getString(input, ['customerId']) ?? '')
   return {
     id: getIdentifier(input, ['id', 'estimateId']),
-    status: getString(input, ['status']) ?? '',
-    customer: getString(input, ['customer.name', 'customerName']) ?? '',
-    job: getIdentifier(input, ['job.id', 'jobId', 'jobNumber']),
+    status,
+    customer,
+    job: getIdentifier(input, ['jobId', 'job.id', 'jobNumber']),
     total: getNumber(input, ['total', 'totalAmount', 'soldTotal']) ?? 0,
     created: getString(input, ['createdOn', 'createdAt', 'createdDate']) ?? '',
   }
@@ -208,15 +253,18 @@ export function toPricebookEquipmentSummary(input: unknown): UnknownRecord {
 }
 
 export function toAppointmentAssignmentSummary(input: unknown): UnknownRecord {
+  // ST dispatch board: appointments have start/end or arrivalWindowStart/arrivalWindowEnd
+  const statusRaw = getPathValue(input, 'status')
+  const status = typeof statusRaw === 'string' ? statusRaw : (getString(statusRaw, ['value', 'name']) ?? '')
   return {
     appointment: getIdentifier(input, ['appointmentId', 'appointment.id', 'id']),
     job: getIdentifier(input, ['jobId', 'job.id']),
     tech:
       getString(input, ['technician.name', 'technicianName', 'employee.name', 'assignedTechnician.name']) ??
       '',
-    start: getString(input, ['start', 'startTime', 'startsOn', 'scheduledStart', 'appointment.start']) ?? '',
-    end: getString(input, ['end', 'endTime', 'endsOn', 'scheduledEnd', 'appointment.end']) ?? '',
-    status: getString(input, ['status']) ?? '',
+    start: getString(input, ['start', 'arrivalWindowStart', 'startTime', 'startsOn', 'scheduledStart']) ?? '',
+    end: getString(input, ['end', 'arrivalWindowEnd', 'endTime', 'endsOn', 'scheduledEnd']) ?? '',
+    status,
   }
 }
 

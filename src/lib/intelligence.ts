@@ -65,7 +65,13 @@ export async function getRevenueSummary(
       pageSize: 5000,
     },
   )
-  const activeInvoices = invoices.filter(invoice => getInvoiceStatus(invoice) !== 'void')
+  // Filter out void/cancelled invoices AND zero-value invoices (ST returns $0 jobs)
+  const activeInvoices = invoices.filter(invoice => {
+    const status = getInvoiceStatus(invoice)
+    if (status === 'void' || status === 'voided' || status === 'cancelled' || status === 'canceled') return false
+    const total = getNumber(invoice, ['total', 'totalAmount', 'invoiceTotal', 'summary.total']) ?? 0
+    return total > 0
+  })
   const totalRevenue = roundCurrency(
     activeInvoices.reduce(
       (sum, invoice) =>
@@ -94,13 +100,13 @@ export async function getSnapshotSummary(
     active_memberships: countResults(client, '/memberships', {active: true}),
     jobs_this_week: countResults(client, '/jobs', {
       completedOnOrAfter: weekRange.from,
-      completedOnOrBefore: date,
-      status: 'Completed',
+      completedOnOrBefore: weekRange.to,
+      jobStatus: 'Completed',
     }),
     jobs_today: countResults(client, '/jobs', {
-      scheduledStartDateOnOrAfter: date,
-      scheduledStartDateOnOrBefore: date,
-      status: 'Scheduled,InProgress',
+      scheduledOnOrAfter: date,
+      scheduledOnOrBefore: date,
+      jobStatus: 'Scheduled,InProgress',
     }),
     open_estimates: countResults(client, '/estimates', {status: 'open'}),
     open_leads: countResults(client, '/leads', {status: 'open'}),
