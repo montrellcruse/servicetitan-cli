@@ -1,6 +1,6 @@
 {
   "name": "@rowvyn/servicetitan-cli",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "ServiceTitan CLI",
   "author": "Montrell Cruse <montrell@rowvyn.com>",
   "license": "MIT",
@@ -76,14 +76,29 @@
       "customers": {
         "description": "Search, view, create, and update customer records"
       },
+      "locations": {
+        "description": "View, create, and update customer service locations"
+      },
       "jobs": {
         "description": "Book, search, update, cancel, and complete service jobs"
+      },
+      "job-types": {
+        "description": "View job types used for booking and ID resolution"
+      },
+      "appointments": {
+        "description": "View job appointments and appointment details"
       },
       "invoices": {
         "description": "View and search invoice records"
       },
       "techs": {
         "description": "View technician profiles and performance data"
+      },
+      "employees": {
+        "description": "View employee records and roles from settings"
+      },
+      "business-units": {
+        "description": "View business units used across settings and jobs"
       },
       "memberships": {
         "description": "Manage membership plans and customer memberships"
@@ -99,6 +114,18 @@
       },
       "dispatch": {
         "description": "View the dispatch board, capacity, and assign technicians"
+      },
+      "calls": {
+        "description": "Browse telecom call records"
+      },
+      "payroll": {
+        "description": "View payrolls, job timesheets, gross pay, and activity codes"
+      },
+      "inventory": {
+        "description": "View purchase orders, vendors, trucks, and warehouses"
+      },
+      "timesheets": {
+        "description": "View technician activities and activity types"
       },
       "reporting": {
         "description": "List and run ServiceTitan reports"
