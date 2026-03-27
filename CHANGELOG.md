@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [0.3.4] - 2026-03-27
+
+### Fixed
+- `memberships list --active` — flag now correctly sends `status='Active'` (lifecycle filter) instead of `active: true` (billing flag that includes Expired memberships)
+- `memberships list` — removed implicit `default: true` on `--active` flag; command now returns all memberships by default, `--active` explicitly filters to Active only
+- `reporting run` — rewrote to use POST to correct ST Reporting API path: `/report-category/{category}/reports/{id}/data` with `parameters` body array. Previous GET implementation always returned 404
+- `reporting run` — output now correctly extracts `.data` rows from the paginated response envelope instead of dumping the raw `{fields, data, page, ...}` object
+- `dist/` rebuilt — several prior source fixes (memberships, reporting) were not reflected in compiled output
+
+
 ## [0.3.3] - 2026-03-27
 
 ### Fixed
