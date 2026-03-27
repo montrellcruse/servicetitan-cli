@@ -4,5 +4,5 @@ coverage
 .DS_Store
 *.log
 
-# Local planning docs (never commit)
-docs/
+# Local scratch/planning docs (never commit)
+docs/scratch/
