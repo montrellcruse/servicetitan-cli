@@ -31,6 +31,10 @@ export async function promptText(
 }
 
 export async function promptSecret(label: string): Promise<string> {
+  if (!process.stdin.isTTY) {
+    throw new Error('Cannot prompt for secrets in non-interactive mode. Use environment variables (ST_CLIENT_ID, ST_CLIENT_SECRET) instead.')
+  }
+
   process.stdout.write(`${label}: `)
 
   return await new Promise<string>(resolve => {

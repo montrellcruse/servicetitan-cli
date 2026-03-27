@@ -2,7 +2,7 @@ import {Flags} from '@oclif/core'
 
 import {saveCredentials} from '../../lib/auth.js'
 import {BaseCommand, baseFlags} from '../../lib/base-command.js'
-import {ServiceTitanClient} from '../../lib/client.js'
+import {ServiceTitanApiError, ServiceTitanClient} from '../../lib/client.js'
 import {saveProfile} from '../../lib/config.js'
 import {printSuccess} from '../../lib/output.js'
 import {promptSecret, promptText} from '../../lib/prompts.js'
@@ -56,7 +56,23 @@ export default class AuthLogin extends BaseCommand {
       tenantId,
     })
 
-    await client.get('/settings/v2/tenant/{tenant}/business-units')
+    try {
+      await client.get('/settings/v2/tenant/{tenant}/business-units')
+    } catch (error) {
+      if (error instanceof ServiceTitanApiError) {
+        if (error.status === 401) {
+          throw new Error(
+            'Authentication failed. Verify your Client ID, Client Secret, and App Key are correct for the selected environment.'
+          )
+        }
+        if (error.status === 403) {
+          throw new Error(
+            'Access denied. Your App Key may not be authorized for this tenant, or the tenant ID is incorrect.'
+          )
+        }
+      }
+      throw error
+    }
     await saveProfile(profileName, {appKey, environment, tenantId})
     await saveCredentials(profileName, clientId, clientSecret)
 

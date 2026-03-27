@@ -1,5 +1,9 @@
 # ServiceTitan CLI
 
+[![CI](https://github.com/montrellcruse/servicetitan-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/montrellcruse/servicetitan-cli/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/@rowvyn/servicetitan-cli.svg)](https://www.npmjs.com/package/@rowvyn/servicetitan-cli)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 > A first-party quality CLI for the ServiceTitan API.
 
 ServiceTitan CLI brings customer, job, invoice, dispatch, reporting, and operational intelligence workflows into a single `st` binary. It is built for developers, operators, and AI agents that need clean output, secure auth, fast scripting, and a reliable escape hatch when the named commands do not cover a niche endpoint yet.
@@ -11,6 +15,18 @@ Highlights:
 - Safe write operations, including raw API mutations, with confirmation prompts and `--dry-run`.
 - An intelligence layer for revenue rollups and daily ops snapshots.
 - Agent-friendly compact output with `ST_AGENT_MODE=1`.
+
+## Requirements
+
+- **Node.js** >= 20
+- **macOS, Linux, or Windows**
+- **Linux only:** `libsecret-1-dev` is required for secure credential storage
+  ```bash
+  # Debian/Ubuntu
+  sudo apt-get install -y libsecret-1-dev
+  # Fedora
+  sudo dnf install -y libsecret-devel
+  ```
 
 ## Installation
 
@@ -821,6 +837,19 @@ ST_PROFILE=acme-int st jobs list --status Scheduled
 ST_OUTPUT=json st customers list --limit 5
 ST_ENVIRONMENT=integration st revenue --period month
 ```
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ST_AGENT_MODE` | Set to `1` for compact JSON output optimized for AI agent consumption | `0` |
+| `ST_TIMEZONE` | IANA timezone for date-aware queries (e.g., `America/New_York`) | System timezone |
+| `ST_DEFAULT_PROFILE` | Override the default auth profile without `--profile` flag | First profile |
+| `ST_CLIENT_ID` | ServiceTitan OAuth client ID (overrides stored credentials) | — |
+| `ST_CLIENT_SECRET` | ServiceTitan OAuth client secret (overrides stored credentials) | — |
+| `ST_TIMEOUT` | Global request timeout in milliseconds | `30000` |
+
+> **Security note:** When `ST_CLIENT_ID` and `ST_CLIENT_SECRET` are set, they take precedence over credentials stored in the OS keychain. Use environment variables for CI/CD pipelines; use `st auth login` for interactive use.
 
 ## Contributing
 
