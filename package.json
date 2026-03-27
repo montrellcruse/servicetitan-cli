@@ -1,8 +1,25 @@
 {
   "name": "@rowvyn/servicetitan-cli",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "description": "ServiceTitan CLI",
+  "author": "Montrell Cruse <montrell@rowvyn.com>",
   "license": "MIT",
+  "keywords": [
+    "servicetitan",
+    "cli",
+    "api",
+    "hvac",
+    "field-service",
+    "rowvyn"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/montrellcruse/servicetitan-cli"
+  },
+  "homepage": "https://github.com/montrellcruse/servicetitan-cli#readme",
+  "bugs": {
+    "url": "https://github.com/montrellcruse/servicetitan-cli/issues"
+  },
   "type": "module",
   "bin": {
     "st": "./bin/run.js"
@@ -48,6 +65,50 @@
     "plugins": [
       "@oclif/plugin-help"
     ],
-    "topicSeparator": " "
+    "topicSeparator": " ",
+    "topics": {
+      "auth": {
+        "description": "Authenticate with ServiceTitan and manage credential profiles"
+      },
+      "customers": {
+        "description": "Search, view, create, and update customer records"
+      },
+      "jobs": {
+        "description": "Book, search, update, cancel, and complete service jobs"
+      },
+      "invoices": {
+        "description": "View and search invoice records"
+      },
+      "techs": {
+        "description": "View technician profiles and performance data"
+      },
+      "memberships": {
+        "description": "Manage membership plans and customer memberships"
+      },
+      "estimates": {
+        "description": "View and search estimate records"
+      },
+      "leads": {
+        "description": "Manage incoming leads, dismiss them, or convert them to booked jobs"
+      },
+      "pricebook": {
+        "description": "Browse services, materials, and equipment from the pricebook"
+      },
+      "dispatch": {
+        "description": "View the dispatch board, capacity, and assign technicians"
+      },
+      "reporting": {
+        "description": "List and run ServiceTitan reports"
+      },
+      "bookings": {
+        "description": "Accept or dismiss online booking requests"
+      },
+      "api": {
+        "description": "Direct API access - call any ServiceTitan endpoint"
+      },
+      "completion": {
+        "description": "Install shell tab completion for bash, zsh, or fish"
+      }
+    }
   }
 }

@@ -8,6 +8,12 @@ import type {UnknownRecord} from '../../lib/types.js'
 export default class JobsList extends BaseCommand {
   public static override description = 'List jobs'
 
+  public static override examples = [
+    '<%= config.bin %> jobs list',
+    '<%= config.bin %> jobs list --status Scheduled,InProgress --date 2026-03-26',
+    '<%= config.bin %> jobs list --fields id,status,customer,total --output csv',
+  ]
+
   public static override flags = {
     ...baseFlags,
     status: Flags.string({

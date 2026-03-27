@@ -8,6 +8,12 @@ import type {UnknownRecord} from '../../lib/types.js'
 export default class InvoicesList extends BaseCommand {
   public static override description = 'List invoices'
 
+  public static override examples = [
+    '<%= config.bin %> invoices list',
+    '<%= config.bin %> invoices list --status unpaid --limit 10',
+    '<%= config.bin %> invoices list --fields id,customer,total,balance --output csv',
+  ]
+
   public static override flags = {
     ...baseFlags,
     status: Flags.string({

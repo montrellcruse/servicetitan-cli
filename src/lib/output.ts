@@ -1,10 +1,11 @@
 import process from 'node:process'
 
-import chalk from 'chalk'
+import chalk, {Chalk} from 'chalk'
 import Table from 'cli-table3'
 import {stringify} from 'csv-stringify'
 
 let colorOverride: boolean | undefined
+const noColorChalk = new Chalk({level: 0})
 
 export function setColorEnabled(enabled: boolean | undefined): void {
   colorOverride = enabled
@@ -71,11 +72,25 @@ export function printInfo(message: string): void {
   process.stdout.write(`${chalk.dim(message)}\n`)
 }
 
+export function printDryRun(method: string, url: string, body?: unknown): void {
+  const chalk = getChalk()
+  process.stdout.write(`${chalk.yellow('[DRY RUN]')} ${method} ${url}\n`)
+
+  if (body !== undefined) {
+    process.stdout.write('Body:\n')
+    process.stdout.write(`${JSON.stringify(body, null, 2)}\n`)
+  }
+}
+
 function getChalk() {
   const noColor =
     colorOverride === false || Boolean(process.env.NO_COLOR) || process.env.ST_NO_COLOR === '1'
 
-  return new chalk.Instance({level: noColor ? 0 : 3})
+  if (noColor) {
+    return noColorChalk
+  }
+
+  return chalk
 }
 
 function stringifyCell(value: unknown): string {

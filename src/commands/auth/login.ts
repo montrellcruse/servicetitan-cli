@@ -10,6 +10,11 @@ import {promptSecret, promptText} from '../../lib/prompts.js'
 export default class AuthLogin extends BaseCommand {
   public static override description = 'Authenticate a ServiceTitan profile and store credentials securely'
 
+  public static override examples = [
+    '<%= config.bin %> auth login',
+    '<%= config.bin %> auth login --profile acme-int --env integration',
+  ]
+
   public static override flags = {
     ...baseFlags,
     env: Flags.string({

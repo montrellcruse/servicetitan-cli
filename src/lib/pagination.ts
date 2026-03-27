@@ -38,6 +38,7 @@ export async function paginate<T>(
   let currentPage = page
 
   try {
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const response = await client.get<T>(path, {
         ...params,

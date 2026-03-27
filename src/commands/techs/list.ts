@@ -8,6 +8,12 @@ import type {UnknownRecord} from '../../lib/types.js'
 export default class TechsList extends BaseCommand {
   public static override description = 'List technicians'
 
+  public static override examples = [
+    '<%= config.bin %> techs list',
+    '<%= config.bin %> techs list --active --limit 10',
+    '<%= config.bin %> techs list --fields id,name,email --output json',
+  ]
+
   public static override flags = {
     ...baseFlags,
     active: Flags.boolean({
@@ -18,6 +24,9 @@ export default class TechsList extends BaseCommand {
     }),
     all: Flags.boolean({
       description: 'Fetch all technician pages',
+    }),
+    fields: Flags.string({
+      description: 'Comma-separated fields to include',
     }),
   }
 
@@ -40,6 +49,7 @@ export default class TechsList extends BaseCommand {
 
     await this.renderRecords(technicians.map(technician => toTechnicianSummary(technician)), {
       defaultFields: ['id', 'name', 'phone', 'email', 'active'],
+      fields: this.parseFields(flags.fields),
     })
   }
 }

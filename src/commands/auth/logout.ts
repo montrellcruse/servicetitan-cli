@@ -3,7 +3,7 @@ import {Flags} from '@oclif/core'
 import {deleteCredentials} from '../../lib/auth.js'
 import {BaseCommand, baseFlags} from '../../lib/base-command.js'
 import {deleteProfile, getActiveProfileName} from '../../lib/config.js'
-import {printSuccess} from '../../lib/output.js'
+import {printInfo, printSuccess} from '../../lib/output.js'
 
 export default class AuthLogout extends BaseCommand {
   public static override description = 'Remove a stored profile and delete its credentials'
@@ -23,7 +23,8 @@ export default class AuthLogout extends BaseCommand {
     const profileName = providedProfile ?? (await getActiveProfileName())
 
     if (typeof profileName !== 'string') {
-      throw new Error('No profile found to remove.')
+      printInfo('No active profile configured. Nothing to remove.')
+      return
     }
 
     await deleteCredentials(profileName)

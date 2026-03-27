@@ -1,6 +1,7 @@
 import {Command, Flags} from '@oclif/core'
 
 import {getCredentials} from './auth.js'
+import {extractResponseRecords, isUnknownRecord} from './api.js'
 import {ServiceTitanApiError, ServiceTitanClient} from './client.js'
 import {getActiveProfileName, getConfig, resolveOutputFormat} from './config.js'
 import {
@@ -58,7 +59,7 @@ interface RuntimeContext {
 export abstract class BaseCommand extends Command {
   protected client?: ServiceTitanClient
   protected compact = false
-  protected config?: ConfigFile
+  protected configData?: ConfigFile
   protected outputFormat: OutputFormat = 'table'
   protected profile?: ProfileConfig
   protected profileName?: string
@@ -93,7 +94,7 @@ export abstract class BaseCommand extends Command {
     const colorEnabled = flags.color ?? config.color
     this.outputFormat = resolveOutputFormat(flags.output, config)
     this.compact = Boolean((flags.compact ?? config.compact) || process.env.ST_AGENT_MODE === '1')
-    this.config = config
+    this.configData = config
 
     setColorEnabled(colorEnabled)
 
@@ -145,6 +146,21 @@ export abstract class BaseCommand extends Command {
     options: {defaultFields?: string[]; fields?: string[]} = {},
   ): Promise<void> {
     if (records.length === 0) {
+      if (this.outputFormat === 'json') {
+        printJSON([])
+        return
+      }
+
+      if (this.outputFormat === 'csv') {
+        const fields = options.fields ?? options.defaultFields ?? []
+
+        if (fields.length > 0) {
+          await printCSV(fields, [])
+        }
+
+        return
+      }
+
       printInfo('No results found.')
       return
     }
@@ -194,6 +210,35 @@ export abstract class BaseCommand extends Command {
       ['Field', 'Value'],
       fields.map(field => [titleCase(field), formatCell(field, getPathValue(shaped, field))]),
     )
+  }
+
+  protected async renderPayload(
+    payload: unknown,
+    options: {defaultFields?: string[]; fields?: string[]} = {},
+  ): Promise<void> {
+    if (this.outputFormat === 'json') {
+      printJSON(payload)
+      return
+    }
+
+    const records = extractResponseRecords(payload)
+
+    if (records.length > 1) {
+      await this.renderRecords(records, options)
+      return
+    }
+
+    if (records.length === 1) {
+      await this.renderRecord(records[0], options)
+      return
+    }
+
+    if (isUnknownRecord(payload)) {
+      await this.renderRecord(payload, options)
+      return
+    }
+
+    printJSON(payload)
   }
 
   private shapeRecord(record: UnknownRecord): JsonObject {
@@ -248,7 +293,7 @@ function formatCell(field: string, value: unknown): string {
 
   if (typeof value === 'string') {
     if (looksLikeIsoDate(value)) {
-      return /(scheduled|time|date)$/i.test(field) ? formatDateTime(value) : formatDate(value)
+      return /[T ]\d{2}:\d{2}/.test(value) ? formatDateTime(value) : formatDate(value)
     }
 
     return value

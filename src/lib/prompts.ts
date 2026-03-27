@@ -11,6 +11,7 @@ export async function promptText(
   })
 
   try {
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const suffix = options.defaultValue ? ` [${options.defaultValue}]` : ''
       const answer = await rl.question(`${label}${suffix}: `)
@@ -70,4 +71,26 @@ export async function promptSecret(label: string): Promise<string> {
     stdin.resume()
     stdin.on('data', onData)
   })
+}
+
+export async function confirmAction(message: string, autoConfirm: boolean): Promise<boolean> {
+  if (autoConfirm) {
+    return true
+  }
+
+  if (!process.stdin.isTTY) {
+    throw new Error('Cannot prompt in non-interactive mode. Use --yes to skip confirmation.')
+  }
+
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  })
+
+  try {
+    const answer = (await rl.question(`${message} (y/N): `)).trim().toLowerCase()
+    return answer === 'y' || answer === 'yes'
+  } finally {
+    rl.close()
+  }
 }

@@ -1,0 +1,194 @@
+export type RevenuePeriod = 'day' | 'week' | 'month' | 'year' | 'ytd'
+
+export interface DateRange {
+  from: string
+  to: string
+}
+
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
+const DAY_MS = 86_400_000
+
+export function getTodayDate(now: Date = new Date()): string {
+  const year = now.getFullYear()
+  const month = `${now.getMonth() + 1}`.padStart(2, '0')
+  const day = `${now.getDate()}`.padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+export function resolvePeriodDateRange(period: RevenuePeriod, referenceDate: string): DateRange {
+  const date = parseDate(referenceDate)
+
+  switch (period) {
+    case 'day': {
+      return {from: referenceDate, to: referenceDate}
+    }
+
+    case 'week': {
+      const weekday = date.getUTCDay()
+      const mondayOffset = weekday === 0 ? -6 : 1 - weekday
+      const monday = addDays(date, mondayOffset)
+      const sunday = addDays(monday, 6)
+      return {
+        from: formatUtcDate(monday),
+        to: formatUtcDate(sunday),
+      }
+    }
+
+    case 'month': {
+      return {
+        from: formatUtcDate(new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1))),
+        to: formatUtcDate(new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0))),
+      }
+    }
+
+    case 'year': {
+      return {
+        from: `${date.getUTCFullYear()}-01-01`,
+        to: `${date.getUTCFullYear()}-12-31`,
+      }
+    }
+
+    case 'ytd': {
+      return {
+        from: `${date.getUTCFullYear()}-01-01`,
+        to: referenceDate,
+      }
+    }
+  }
+}
+
+export function resolveDateRange(options: {
+  clampToReferenceDate?: boolean
+  from?: string
+  period?: RevenuePeriod
+  referenceDate?: string
+  to?: string
+} = {}): DateRange {
+  const referenceDate = assertDateString(options.referenceDate ?? getTodayDate(), 'Reference date')
+  const period = options.period ?? 'month'
+  const baseRange = resolvePeriodDateRange(period, referenceDate)
+  const clampedBaseRange = options.clampToReferenceDate
+    ? {
+        from: baseRange.from,
+        to: baseRange.to > referenceDate ? referenceDate : baseRange.to,
+      }
+    : baseRange
+  const from = options.from ? assertDateString(options.from, 'From date') : clampedBaseRange.from
+  const to = options.to ? assertDateString(options.to, 'To date') : clampedBaseRange.to
+
+  if (from > to) {
+    throw new Error('From date must be on or before the to date.')
+  }
+
+  return {from, to}
+}
+
+export function assertDateString(value: string, label = 'Date'): string {
+  parseDate(value, label)
+  return value
+}
+
+export function formatLongDate(value: string): string {
+  const date = parseDate(value)
+  return new Intl.DateTimeFormat('en-US', {
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+    year: 'numeric',
+  }).format(date)
+}
+
+export function formatMonthYear(value: string): string {
+  const date = parseDate(value)
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    timeZone: 'UTC',
+    year: 'numeric',
+  }).format(date)
+}
+
+export function formatShortDateRange(range: DateRange): string {
+  const fromDate = parseDate(range.from)
+  const toDate = parseDate(range.to)
+  const shortFormatter = new Intl.DateTimeFormat('en-US', {
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  })
+  const shortWithYearFormatter = new Intl.DateTimeFormat('en-US', {
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+    year: 'numeric',
+  })
+
+  if (range.from === range.to) {
+    return shortWithYearFormatter.format(fromDate)
+  }
+
+  if (fromDate.getUTCFullYear() === toDate.getUTCFullYear()) {
+    return `${shortFormatter.format(fromDate)} - ${shortWithYearFormatter.format(toDate)}`
+  }
+
+  return `${shortWithYearFormatter.format(fromDate)} - ${shortWithYearFormatter.format(toDate)}`
+}
+
+export function formatPeriodLabel(
+  period: RevenuePeriod,
+  range: DateRange,
+  options: {custom?: boolean} = {},
+): string {
+  if (options.custom) {
+    return formatShortDateRange(range)
+  }
+
+  switch (period) {
+    case 'day': {
+      return formatLongDate(range.from)
+    }
+
+    case 'week': {
+      return `Week of ${formatLongDate(range.from)}`
+    }
+
+    case 'month': {
+      return formatMonthYear(range.from)
+    }
+
+    case 'year': {
+      return range.from.slice(0, 4)
+    }
+
+    case 'ytd': {
+      return `Year to Date ${range.from.slice(0, 4)}`
+    }
+  }
+}
+
+function parseDate(value: string, label = 'Date'): Date {
+  if (!DATE_PATTERN.test(value)) {
+    throw new Error(`${label} must look like YYYY-MM-DD.`)
+  }
+
+  const [year, month, day] = value.split('-').map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day))
+
+  if (
+    Number.isNaN(date.getTime()) ||
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    throw new Error(`${label} must be a valid YYYY-MM-DD date.`)
+  }
+
+  return date
+}
+
+function addDays(date: Date, offset: number): Date {
+  return new Date(date.getTime() + offset * DAY_MS)
+}
+
+function formatUtcDate(date: Date): string {
+  return date.toISOString().slice(0, 10)
+}

@@ -8,6 +8,12 @@ import type {UnknownRecord} from '../../lib/types.js'
 export default class CustomersList extends BaseCommand {
   public static override description = 'List customers'
 
+  public static override examples = [
+    '<%= config.bin %> customers list',
+    '<%= config.bin %> customers list --output json | jq .[0]',
+    '<%= config.bin %> customers list --fields id,name,phone',
+  ]
+
   public static override flags = {
     ...baseFlags,
     search: Flags.string({

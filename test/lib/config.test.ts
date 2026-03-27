@@ -1,4 +1,4 @@
-import {mkdtemp, rm} from 'node:fs/promises'
+import {mkdtemp, rm, stat} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 
@@ -8,6 +8,7 @@ import {
   deleteProfile,
   getActiveProfileName,
   getConfig,
+  getConfigPath,
   saveConfig,
   saveProfile,
 } from '../../src/lib/config.js'
@@ -64,6 +65,27 @@ describe('config', () => {
     expect(config.output).toBe('json')
     expect(config.color).toBe(false)
     expect(config.compact).toBe(true)
+  })
+
+  it('writes the config file with owner-only permissions', async () => {
+    await saveConfig({
+      color: true,
+      compact: false,
+      default: 'primary',
+      output: 'table',
+      profiles: {
+        primary: {
+          appKey: 'app-key',
+          environment: 'production',
+          tenantId: '99',
+        },
+      },
+      version: '1',
+    })
+
+    const info = await stat(getConfigPath())
+
+    expect(info.mode & 0o777).toBe(0o600)
   })
 
   it('deletes profiles and resets the default', async () => {

@@ -1,4 +1,4 @@
-import {mkdir, readFile, writeFile} from 'node:fs/promises'
+import {chmod, mkdir, readFile, writeFile} from 'node:fs/promises'
 import {homedir} from 'node:os'
 import {dirname, join} from 'node:path'
 
@@ -76,8 +76,9 @@ export async function saveConfig(config: ConfigFile): Promise<void> {
     ...config,
   })
 
-  await mkdir(dirname(configPath), {recursive: true})
+  await mkdir(dirname(configPath), {mode: 0o700, recursive: true})
   await writeFile(configPath, `${JSON.stringify(normalized, null, 2)}\n`, 'utf8')
+  await chmod(configPath, 0o600)
 }
 
 export async function saveProfile(name: string, profile: ProfileConfig): Promise<void> {

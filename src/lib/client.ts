@@ -110,7 +110,7 @@ const MODULE_PREFIX_PATTERN =
 
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
   __stRetried401?: boolean
-  __stRetried429?: boolean
+  __stRetryCount429?: number
 }
 
 export class ServiceTitanApiError extends Error {
@@ -128,6 +128,7 @@ export class ServiceTitanApiError extends Error {
 export class ServiceTitanClient {
   private readonly authHttp: AxiosInstance
   private readonly http: AxiosInstance
+  private readonly reportCallTimestamps = new Map<string, number>()
   private tokenCache?: {accessToken: string; expiresAt: number}
   private tokenRequest?: Promise<string>
 
@@ -168,9 +169,12 @@ export class ServiceTitanClient {
     return `/${moduleName}/v2/tenant/${this.options.tenantId}${normalizedPath}`
   }
 
+  public resolveRawPath(path: string): string {
+    return normalizePath(path).replaceAll('{tenant}', this.options.tenantId)
+  }
+
   public resolvePath(path: string): string {
-    const withTenant = normalizePath(path).replaceAll('{tenant}', this.options.tenantId)
-    return this.addApiPrefix(withTenant)
+    return this.addApiPrefix(this.resolveRawPath(path))
   }
 
   public async ensureToken(forceRefresh = false): Promise<string> {
@@ -190,7 +194,16 @@ export class ServiceTitanClient {
   }
 
   public async get<T>(path: string, params?: Record<string, unknown>): Promise<T> {
-    const response = await this.http.get<T>(this.resolvePath(path), {params})
+    const resolvedPath = this.resolvePath(path)
+    await this.maybeThrottleReportingRequest(resolvedPath, params)
+    const response = await this.http.get<T>(resolvedPath, {params})
+    return response.data
+  }
+
+  public async getRaw<T>(path: string, params?: Record<string, unknown>): Promise<T> {
+    const resolvedPath = this.resolveRawPath(path)
+    await this.maybeThrottleReportingRequest(resolvedPath, params)
+    const response = await this.http.get<T>(resolvedPath, {params})
     return response.data
   }
 
@@ -203,12 +216,30 @@ export class ServiceTitanClient {
     return response.data
   }
 
+  public async postRaw<T>(
+    path: string,
+    body?: unknown,
+    params?: Record<string, unknown>,
+  ): Promise<T> {
+    const response = await this.http.post<T>(this.resolveRawPath(path), body, {params})
+    return response.data
+  }
+
   public async put<T>(
     path: string,
     body?: unknown,
     params?: Record<string, unknown>,
   ): Promise<T> {
     const response = await this.http.put<T>(this.resolvePath(path), body, {params})
+    return response.data
+  }
+
+  public async putRaw<T>(
+    path: string,
+    body?: unknown,
+    params?: Record<string, unknown>,
+  ): Promise<T> {
+    const response = await this.http.put<T>(this.resolveRawPath(path), body, {params})
     return response.data
   }
 
@@ -223,6 +254,11 @@ export class ServiceTitanClient {
 
   public async delete<T>(path: string, params?: Record<string, unknown>): Promise<T> {
     const response = await this.http.delete<T>(this.resolvePath(path), {params})
+    return response.data
+  }
+
+  public async deleteRaw<T>(path: string, params?: Record<string, unknown>): Promise<T> {
+    const response = await this.http.delete<T>(this.resolveRawPath(path), {params})
     return response.data
   }
 
@@ -277,6 +313,34 @@ export class ServiceTitanClient {
     this.tokenCache = undefined
   }
 
+  private async maybeThrottleReportingRequest(
+    path: string,
+    params?: Record<string, unknown>,
+  ): Promise<void> {
+    const reportId = getReportingReportId(path, params)
+
+    if (!reportId) {
+      return
+    }
+
+    await this.throttleReportingCall(reportId)
+  }
+
+  private async throttleReportingCall(reportId: string): Promise<void> {
+    const MIN_GAP_MS = 12_000
+    const last = this.reportCallTimestamps.get(reportId)
+
+    if (typeof last === 'number') {
+      const wait = MIN_GAP_MS - (Date.now() - last)
+
+      if (wait > 0) {
+        await sleep(wait)
+      }
+    }
+
+    this.reportCallTimestamps.set(reportId, Date.now())
+  }
+
   private async handleResponseError(error: AxiosError): Promise<unknown> {
     const config = error.config as RetryableRequestConfig | undefined
     const path = config?.url ?? 'unknown path'
@@ -294,10 +358,15 @@ export class ServiceTitanClient {
       return this.http.request(config)
     }
 
-    if (error.response?.status === 429 && config && !config.__stRetried429) {
-      config.__stRetried429 = true
-      await sleep(parseRetryAfterMs(error.response.headers['retry-after']))
-      return this.http.request(config)
+    if (error.response?.status === 429 && config) {
+      const retryCount = config.__stRetryCount429 ?? 0
+
+      if (retryCount < 2) {
+        config.__stRetryCount429 = retryCount + 1
+        const retryAfterMs = parseRetryAfterMs(error.response.headers['retry-after'])
+        await sleep(retryAfterMs ?? getExponentialBackoffMs(retryCount))
+        return this.http.request(config)
+      }
     }
 
     throw new ServiceTitanApiError(
@@ -359,7 +428,24 @@ function normalizePath(path: string): string {
   return path.startsWith('/') ? path : `/${path}`
 }
 
-function parseRetryAfterMs(headerValue: unknown): number {
+function getReportingReportId(
+  path: string,
+  params?: Record<string, unknown>,
+): string | undefined {
+  if (!path.includes('/reporting/v2/')) {
+    return undefined
+  }
+
+  const reportId = params?.reportId
+
+  if (typeof reportId === 'number' || typeof reportId === 'string') {
+    return String(reportId)
+  }
+
+  return undefined
+}
+
+function parseRetryAfterMs(headerValue: unknown): number | undefined {
   if (typeof headerValue === 'number') {
     return Math.max(headerValue * 1000, 1_000)
   }
@@ -382,7 +468,11 @@ function parseRetryAfterMs(headerValue: unknown): number {
     }
   }
 
-  return 1_000
+  return undefined
+}
+
+function getExponentialBackoffMs(attempt: number): number {
+  return Math.min(2 ** attempt * 1000, 30_000)
 }
 
 function parseTimeout(value: string | undefined): number | undefined {

@@ -1,0 +1,11 @@
+docs/
+Formula/
+test/
+*.test.ts
+.eslintrc.json
+tsconfig.eslint.json
+vitest.config.ts
+coverage/
+.github/
+*.map
+**/*.map
