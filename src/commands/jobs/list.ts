@@ -1,6 +1,7 @@
 import {Flags} from '@oclif/core'
 
 import {BaseCommand, baseFlags} from '../../lib/base-command.js'
+import {assertDateString} from '../../lib/date-ranges.js'
 import {toJobSummary} from '../../lib/entities.js'
 import {paginate} from '../../lib/pagination.js'
 import type {UnknownRecord} from '../../lib/types.js'
@@ -25,6 +26,9 @@ export default class JobsList extends BaseCommand {
     'date-range': Flags.string({
       description: 'Date range to filter by (YYYY-MM-DD..YYYY-MM-DD)',
     }),
+    page: Flags.integer({
+      description: 'Page number to fetch (1-based)',
+    }),
     limit: Flags.integer({
       description: 'Maximum number of jobs to return',
     }),
@@ -40,7 +44,8 @@ export default class JobsList extends BaseCommand {
     const {flags} = await this.parse(JobsList)
     const {client} = await this.initializeRuntime(flags)
     const statusValue = typeof flags.status === 'string' ? flags.status : undefined
-    const dateValue = typeof flags.date === 'string' ? flags.date : undefined
+    const dateValue =
+      typeof flags.date === 'string' ? assertDateString(flags.date, 'Date') : undefined
     const dateRangeValue =
       typeof flags['date-range'] === 'string' ? flags['date-range'] : undefined
     const {from, to} = parseDateRange(dateRangeValue)
@@ -59,6 +64,7 @@ export default class JobsList extends BaseCommand {
           : undefined,
         date: dateValue,
         from,
+        page: flags.page,
         to,
       },
       {
@@ -80,10 +86,17 @@ function parseDateRange(value: string | undefined): {from?: string; to?: string}
     return {}
   }
 
-  const [from, to] = value.split('..')
+  const [rawFrom, rawTo] = value.split('..')
 
-  if (!from || !to) {
+  if (!rawFrom || !rawTo) {
     throw new Error('Date range must look like YYYY-MM-DD..YYYY-MM-DD.')
+  }
+
+  const from = assertDateString(rawFrom, 'From date')
+  const to = assertDateString(rawTo, 'To date')
+
+  if (from > to) {
+    throw new Error('From date must be on or before the to date.')
   }
 
   return {from, to}

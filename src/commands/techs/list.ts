@@ -19,6 +19,9 @@ export default class TechsList extends BaseCommand {
     active: Flags.boolean({
       description: 'Only include active technicians',
     }),
+    page: Flags.integer({
+      description: 'Page number to fetch (1-based)',
+    }),
     limit: Flags.integer({
       description: 'Maximum number of technicians to return',
     }),
@@ -39,6 +42,7 @@ export default class TechsList extends BaseCommand {
       '/technicians',
       {
         active: flags.active ? true : undefined,
+        page: flags.page,
       },
       {
         all: flags.all,

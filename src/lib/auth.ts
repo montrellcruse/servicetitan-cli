@@ -2,7 +2,8 @@ import keytar from 'keytar'
 
 import type {Credentials} from './types.js'
 
-export const SERVICE_NAME = 'servicetitan-cli'
+export const SERVICE_NAME = '@rowvyn/servicetitan-cli'
+export const LEGACY_SERVICE_NAMES = ['servicetitan-cli'] as const
 
 export async function saveCredentials(
   profile: string,
@@ -24,7 +25,7 @@ export async function getCredentials(profile: string): Promise<Credentials | nul
     }
   }
 
-  const payload = await keytar.getPassword(SERVICE_NAME, profile)
+  const payload = await getStoredPayload(profile)
 
   if (!payload) {
     return null
@@ -43,5 +44,23 @@ export async function getCredentials(profile: string): Promise<Credentials | nul
 }
 
 export async function deleteCredentials(profile: string): Promise<void> {
-  await keytar.deletePassword(SERVICE_NAME, profile)
+  await Promise.all([SERVICE_NAME, ...LEGACY_SERVICE_NAMES].map(service => keytar.deletePassword(service, profile)))
+}
+
+async function getStoredPayload(profile: string): Promise<string | null> {
+  const primaryPayload = await keytar.getPassword(SERVICE_NAME, profile)
+
+  if (primaryPayload) {
+    return primaryPayload
+  }
+
+  for (const serviceName of LEGACY_SERVICE_NAMES) {
+    const payload = await keytar.getPassword(serviceName, profile)
+
+    if (payload) {
+      return payload
+    }
+  }
+
+  return null
 }

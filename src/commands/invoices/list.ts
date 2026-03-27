@@ -20,6 +20,9 @@ export default class InvoicesList extends BaseCommand {
       description: 'Invoice status filter (paid, unpaid, void)',
       options: ['paid', 'unpaid', 'void'],
     }),
+    page: Flags.integer({
+      description: 'Page number to fetch (1-based)',
+    }),
     limit: Flags.integer({
       description: 'Maximum number of invoices to return',
     }),
@@ -39,6 +42,7 @@ export default class InvoicesList extends BaseCommand {
       client!,
       '/invoices',
       {
+        page: flags.page,
         status: flags.status,
       },
       {

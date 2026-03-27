@@ -20,6 +20,9 @@ export default class PricebookServices extends BaseCommand {
     category: Flags.string({
       description: 'Service category filter',
     }),
+    page: Flags.integer({
+      description: 'Page number to fetch (1-based)',
+    }),
     limit: Flags.integer({
       description: 'Maximum number of services to return',
     }),
@@ -41,6 +44,7 @@ export default class PricebookServices extends BaseCommand {
       {
         active: flags.active,
         category: flags.category,
+        page: flags.page,
         search: flags.search,
       },
       {

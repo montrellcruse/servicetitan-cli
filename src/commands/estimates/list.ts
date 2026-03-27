@@ -17,6 +17,9 @@ export default class EstimatesList extends BaseCommand {
     job: Flags.integer({
       description: 'Job ID filter',
     }),
+    page: Flags.integer({
+      description: 'Page number to fetch (1-based)',
+    }),
     limit: Flags.integer({
       description: 'Maximum number of estimates to return',
     }),
@@ -37,6 +40,7 @@ export default class EstimatesList extends BaseCommand {
       '/estimates',
       {
         jobId: flags.job,
+        page: flags.page,
         status: flags.status,
       },
       {

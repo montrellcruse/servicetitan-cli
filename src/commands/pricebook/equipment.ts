@@ -17,6 +17,9 @@ export default class PricebookEquipment extends BaseCommand {
     search: Flags.string({
       description: 'Search equipment by name',
     }),
+    page: Flags.integer({
+      description: 'Page number to fetch (1-based)',
+    }),
     limit: Flags.integer({
       description: 'Maximum number of equipment items to return',
     }),
@@ -37,6 +40,7 @@ export default class PricebookEquipment extends BaseCommand {
       '/equipment',
       {
         active: flags.active,
+        page: flags.page,
         search: flags.search,
       },
       {

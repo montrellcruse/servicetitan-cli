@@ -50,6 +50,7 @@ export default class JobsBook extends BaseCommand {
     }),
     location: Flags.integer({
       description: 'Location ID',
+      required: true,
     }),
     'business-unit': Flags.integer({
       description: 'Business unit ID',

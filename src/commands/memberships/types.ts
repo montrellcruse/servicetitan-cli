@@ -14,6 +14,9 @@ export default class MembershipsTypes extends BaseCommand {
       allowNo: true,
       description: 'Filter membership types by active status',
     }),
+    page: Flags.integer({
+      description: 'Page number to fetch (1-based)',
+    }),
     limit: Flags.integer({
       description: 'Maximum number of membership types to return',
     }),
@@ -28,6 +31,7 @@ export default class MembershipsTypes extends BaseCommand {
       '/membership-types',
       {
         active: flags.active,
+        page: flags.page,
       },
       {
         limit,

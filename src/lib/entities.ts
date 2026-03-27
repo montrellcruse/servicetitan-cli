@@ -260,7 +260,11 @@ function toReportRows(input: unknown): UnknownRecord[] {
   const categoryName = getString(input, ['name', 'categoryName', 'category.name']) ?? ''
   const reports = getPathValue(input, 'reports')
 
-  if (Array.isArray(reports) && reports.length > 0) {
+  if (Array.isArray(reports)) {
+    if (reports.length === 0) {
+      return []
+    }
+
     return reports.map(report => ({
       category: categoryName || (getString(report, ['categoryName', 'category.name']) ?? ''),
       report: getString(report, ['name', 'reportName', 'report']) ?? '',

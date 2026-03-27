@@ -18,6 +18,8 @@ The package installs a single binary: `st`.
 
 ### npm
 
+Linux note: `keytar` depends on `libsecret`. Install `libsecret-1-dev` before the npm global install on Ubuntu/Debian runners and workstations.
+
 ```bash
 npm install -g @rowvyn/servicetitan-cli
 st --version
@@ -33,7 +35,7 @@ st --version
 
 ### Direct download
 
-Standalone binaries are not published for `v0.1.0`. Use the npm package or Homebrew formula instead.
+Standalone binaries are not currently published. Use the npm package or Homebrew formula instead.
 
 ## Quick Start
 
@@ -73,7 +75,7 @@ st completion install
 
 ## Commands
 
-Every command supports `--profile`, `--output table|json|csv`, `--compact`, and `--no-color`. Most list commands also support `--fields`, and most list-style endpoints support `--all` for autopagination.
+Every command supports `--profile`, `--output table|json|csv`, `--compact`, and `--no-color`. Most list commands also support `--limit`, `--page`, `--fields`, and `--all` for autopagination.
 
 ### auth
 
@@ -107,11 +109,12 @@ Browse CRM customers, inspect a single record, and create or update customers sa
 ```text
 $ st customers list --help
 USAGE
-  $ st customers list [--output table|json|csv] [--profile <value>] [--color] [--compact] [--search <value>] [--active] [--limit <value>] [--all] [--fields <value>]
+  $ st customers list [--output table|json|csv] [--profile <value>] [--color] [--compact] [--search <value>] [--active] [--page <value>] [--limit <value>] [--all] [--fields <value>]
 
 FLAGS
   --search=<value>   Customer search string
   --active           Only include active customers
+  --page=<value>     Page number to fetch (1-based)
   --limit=<value>    Maximum number of customers to return
   --all              Fetch all customer pages
   --fields=<value>   Comma-separated fields to include
@@ -163,12 +166,13 @@ Inspect the operational core of the tenant: job queues, schedules, totals, and s
 ```text
 $ st jobs list --help
 USAGE
-  $ st jobs list [--output table|json|csv] [--profile <value>] [--color] [--compact] [--status <value>] [--date <value>] [--date-range <value>] [--limit <value>] [--all] [--fields <value>]
+  $ st jobs list [--output table|json|csv] [--profile <value>] [--color] [--compact] [--status <value>] [--date <value>] [--date-range <value>] [--page <value>] [--limit <value>] [--all] [--fields <value>]
 
 FLAGS
   --status=<value>      Comma-separated job statuses
   --date=<value>        Exact date to filter by (YYYY-MM-DD)
   --date-range=<value>  Date range to filter by (YYYY-MM-DD..YYYY-MM-DD)
+  --page=<value>        Page number to fetch (1-based)
   --limit=<value>       Maximum number of jobs to return
   --fields=<value>      Comma-separated fields to include
 ```
@@ -220,10 +224,11 @@ Review receivables, balances, and invoice detail from accounting.
 ```text
 $ st invoices list --help
 USAGE
-  $ st invoices list [--output table|json|csv] [--profile <value>] [--color] [--compact] [--status paid|unpaid|void] [--limit <value>] [--all] [--fields <value>]
+  $ st invoices list [--output table|json|csv] [--profile <value>] [--color] [--compact] [--status paid|unpaid|void] [--page <value>] [--limit <value>] [--all] [--fields <value>]
 
 FLAGS
   --status=<option>  Invoice status filter (paid, unpaid, void)
+  --page=<value>     Page number to fetch (1-based)
   --limit=<value>    Maximum number of invoices to return
   --all              Fetch all invoice pages
   --fields=<value>   Comma-separated fields to include
@@ -266,10 +271,11 @@ List technicians and inspect the people behind the dispatch board.
 ```text
 $ st techs list --help
 USAGE
-  $ st techs list [--output table|json|csv] [--profile <value>] [--color] [--compact] [--active] [--limit <value>] [--all] [--fields <value>]
+  $ st techs list [--output table|json|csv] [--profile <value>] [--color] [--compact] [--active] [--page <value>] [--limit <value>] [--all] [--fields <value>]
 
 FLAGS
   --active           Only include active technicians
+  --page=<value>     Page number to fetch (1-based)
   --limit=<value>    Maximum number of technicians to return
   --all              Fetch all technician pages
   --fields=<value>   Comma-separated fields to include
@@ -413,6 +419,42 @@ $ st leads convert 210411 --dry-run
 [DRY RUN] POST https://api.servicetitan.io/crm/v2/tenant/985798691/leads/210411/convert
 Body:
 {}
+```
+
+### bookings
+
+Triage inbound booking requests from the tenant-facing bookings API.
+
+```bash
+$ st bookings list --status open --page 2 --limit 3
+Id      Status  Customer           Source                  Created
+310511  Open    Rivera Residence   Google Local Services   2026-03-26T14:05:10Z
+310512  Open    Mesa Animal Clinic Website Widget          2026-03-26T14:28:31Z
+310513  Open    Parkview Dental    Referral Program        2026-03-26T15:02:44Z
+```
+
+```bash
+$ st bookings get 310511
+Field     Value
+Id        310511
+Status    Open
+Customer  Rivera Residence
+Source    Google Local Services
+Created   2026-03-26T14:05:10Z
+Phone     480-555-0178
+Email     service@riveraresidence.com
+Address   1842 S Desert Willow Dr
+Notes     Customer prefers text updates
+```
+
+```bash
+$ st bookings dismiss 310511 --reason "Duplicate inquiry" --dry-run
+[DRY RUN] PATCH https://api.servicetitan.io/crm/v2/tenant/985798691/bookings/310511
+Body:
+{
+  "status": "Dismissed",
+  "reason": "Duplicate inquiry"
+}
 ```
 
 ### pricebook
@@ -625,6 +667,15 @@ Email    ops@greenwayfit.com
 ```bash
 $ st api delete /crm/v2/tenant/{tenant}/tags/118 --yes
 ✓ DELETE request succeeded.
+```
+
+### completion
+
+Install shell completion when you want faster CLI navigation and flag discovery.
+
+```bash
+$ st completion install --shell zsh
+✓ Installed zsh completion at ~/.zshrc
 ```
 
 ## Intelligence Layer

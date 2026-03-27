@@ -58,6 +58,29 @@ describe('jobs commands', () => {
     })
   })
 
+  it('translates date-range into from/to filters', async () => {
+    const getSpy = vi.fn().mockResolvedValue({
+      data: [createJob()],
+      hasMore: false,
+    })
+    createTestContext({
+      client: {
+        get: getSpy,
+      },
+    })
+
+    await JobsList.run(['--date-range', '2026-03-01..2026-03-31'], process.cwd())
+
+    expect(getSpy).toHaveBeenCalledWith('/jobs', {
+      date: undefined,
+      from: '2026-03-01',
+      page: 1,
+      pageSize: 50,
+      status: undefined,
+      to: '2026-03-31',
+    })
+  })
+
   it('fetches and renders a single job', async () => {
     const getSpy = vi.fn().mockResolvedValue(createJob())
     const {output} = createTestContext({

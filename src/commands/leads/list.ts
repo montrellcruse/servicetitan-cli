@@ -14,6 +14,9 @@ export default class LeadsList extends BaseCommand {
       description: 'Lead status filter',
       options: ['open', 'won', 'lost', 'dismissed'],
     }),
+    page: Flags.integer({
+      description: 'Page number to fetch (1-based)',
+    }),
     limit: Flags.integer({
       description: 'Maximum number of leads to return',
     }),
@@ -33,6 +36,7 @@ export default class LeadsList extends BaseCommand {
       client!,
       '/leads',
       {
+        page: flags.page,
         status: flags.status,
       },
       {

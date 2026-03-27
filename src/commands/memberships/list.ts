@@ -21,6 +21,9 @@ export default class MembershipsList extends BaseCommand {
     type: Flags.string({
       description: 'Membership type filter',
     }),
+    page: Flags.integer({
+      description: 'Page number to fetch (1-based)',
+    }),
     limit: Flags.integer({
       description: 'Maximum number of memberships to return',
     }),
@@ -42,6 +45,7 @@ export default class MembershipsList extends BaseCommand {
       {
         active: flags.active,
         customerId: flags.customer,
+        page: flags.page,
         type: flags.type,
       },
       {

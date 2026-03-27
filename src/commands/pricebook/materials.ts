@@ -17,6 +17,9 @@ export default class PricebookMaterials extends BaseCommand {
     search: Flags.string({
       description: 'Search materials by name',
     }),
+    page: Flags.integer({
+      description: 'Page number to fetch (1-based)',
+    }),
     limit: Flags.integer({
       description: 'Maximum number of materials to return',
     }),
@@ -37,6 +40,7 @@ export default class PricebookMaterials extends BaseCommand {
       '/materials',
       {
         active: flags.active,
+        page: flags.page,
         search: flags.search,
       },
       {

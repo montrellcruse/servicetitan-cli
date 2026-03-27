@@ -19,7 +19,10 @@ export default class DispatchCapacity extends BaseCommand {
     const {flags} = await this.parse(DispatchCapacity)
     const {client} = await this.initializeRuntime(flags)
     const date = assertDateString(flags.date ?? getTodayDate(), 'Date')
-    const response = await client!.get<unknown>('/capacity', {date})
+    const response = await client!.post<unknown>('/capacity', undefined, {
+      endsOnOrBefore: date,
+      startsOnOrAfter: date,
+    })
     const capacity = extractResponseRecords(response)
 
     await this.renderRecords(capacity.map(item => toCapacitySummary(item)), {

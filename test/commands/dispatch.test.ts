@@ -31,19 +31,20 @@ describe('dispatch commands', () => {
   })
 
   it('renders dispatch capacity for a given date', async () => {
-    const getSpy = vi.fn().mockResolvedValue({
+    const postSpy = vi.fn().mockResolvedValue({
       data: [createCapacity()],
     })
     const {output} = createTestContext({
       client: {
-        get: getSpy,
+        post: postSpy,
       },
     })
 
     await DispatchCapacity.run(['--date', '2026-03-26'], process.cwd())
 
-    expect(getSpy).toHaveBeenCalledWith('/capacity', {
-      date: '2026-03-26',
+    expect(postSpy).toHaveBeenCalledWith('/capacity', undefined, {
+      endsOnOrBefore: '2026-03-26',
+      startsOnOrAfter: '2026-03-26',
     })
     const rendered = stripAnsi(output())
     expect(rendered).toContain('Residential HVAC')

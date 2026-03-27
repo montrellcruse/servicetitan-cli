@@ -22,6 +22,9 @@ export default class CustomersList extends BaseCommand {
     active: Flags.boolean({
       description: 'Only include active customers',
     }),
+    page: Flags.integer({
+      description: 'Page number to fetch (1-based)',
+    }),
     limit: Flags.integer({
       description: 'Maximum number of customers to return',
     }),
@@ -43,6 +46,7 @@ export default class CustomersList extends BaseCommand {
       {
         search: flags.search,
         active: flags.active ? true : undefined,
+        page: flags.page,
       },
       {
         all: flags.all,

@@ -1,5 +1,6 @@
 import {afterEach, describe, expect, it, vi} from 'vitest'
 
+import ApiGet from '../../src/commands/api/get.js'
 import ApiDelete from '../../src/commands/api/delete.js'
 import ApiPost from '../../src/commands/api/post.js'
 import ApiPut from '../../src/commands/api/put.js'
@@ -34,6 +35,22 @@ describe('api escape hatch', () => {
       pageSize: 10,
       status: 'open',
     })
+  })
+
+  it('passes raw GET requests through without module prefixing', async () => {
+    const {getRawSpy, output} = createApiContext()
+    getRawSpy.mockResolvedValue([{id: 403219, name: 'Greenway Fitness'}])
+
+    await ApiGet.run(
+      ['/crm/v2/tenant/{tenant}/customers', '--params', 'page=2,pageSize=5'],
+      process.cwd(),
+    )
+
+    expect(getRawSpy).toHaveBeenCalledWith('/crm/v2/tenant/{tenant}/customers', {
+      page: 2,
+      pageSize: 5,
+    })
+    expect(stripAnsi(output())).toContain('Greenway Fitness')
   })
 
   it('supports dry-run mode for raw POST requests', async () => {
@@ -91,17 +108,20 @@ describe('api escape hatch', () => {
 
 function createApiContext(): {
   deleteRawSpy: ReturnType<typeof vi.spyOn>
+  getRawSpy: ReturnType<typeof vi.spyOn>
   output: () => string
   postRawSpy: ReturnType<typeof vi.spyOn>
   putRawSpy: ReturnType<typeof vi.spyOn>
 } {
   const {client: apiClient, output} = createTestContext()
+  const getRawSpy = vi.spyOn(apiClient, 'getRaw')
   const postRawSpy = vi.spyOn(apiClient, 'postRaw')
   const putRawSpy = vi.spyOn(apiClient, 'putRaw')
   const deleteRawSpy = vi.spyOn(apiClient, 'deleteRaw')
 
   return {
     deleteRawSpy,
+    getRawSpy,
     output,
     postRawSpy,
     putRawSpy,

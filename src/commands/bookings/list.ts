@@ -15,6 +15,9 @@ export default class BookingsList extends BaseCommand {
       description: 'Booking status filter',
       options: ['open', 'converted', 'dismissed'],
     }),
+    page: Flags.integer({
+      description: 'Page number to fetch (1-based)',
+    }),
     limit: Flags.integer({
       description: 'Maximum number of bookings to return',
     }),
@@ -34,6 +37,7 @@ export default class BookingsList extends BaseCommand {
       client!,
       '/bookings',
       {
+        page: flags.page,
         status: normalizeBookingStatus(flags.status),
       },
       {
