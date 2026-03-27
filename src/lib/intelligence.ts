@@ -159,13 +159,12 @@ export async function getSnapshotSummary(
   const tasks: Record<SnapshotMetricKey, Promise<number>> = {
     active_memberships: countResults(client, '/memberships', {active: true}),
     jobs_this_week: countResults(client, '/jobs', {
-      scheduledOnOrAfter: weekRange.from,
-      scheduledOnOrBefore: weekRange.to,
+      completedOnOrAfter: weekRange.from,
+      completedOnOrBefore: weekRange.to,
     }),
     jobs_today: countResults(client, '/jobs', {
-      scheduledOnOrAfter: date,
-      scheduledOnOrBefore: date,
-      jobStatus: 'Scheduled,InProgress',
+      completedOnOrAfter: date,
+      completedOnOrBefore: date,
     }),
     open_estimates: countResults(client, '/estimates', {status: 'open'}),
     open_leads: countResults(client, '/leads', {status: 'open'}),
@@ -200,6 +199,7 @@ async function countResults(
   path: string,
   params: Record<string, unknown>,
 ): Promise<number> {
+  // First try with pageSize=1 to check for totalCount header
   const response = await client.get<UnknownRecord>(path, {
     ...params,
     page: 1,
@@ -210,15 +210,16 @@ async function countResults(
     return response.totalCount
   }
 
-  if (response.hasMore) {
-    const records = await paginate<UnknownRecord>(client, path, params, {
-      all: true,
-      pageSize: 5000,
-    })
-    return records.length
-  }
-
-  return response.data.length
+  // If no totalCount, paginate with a large page size but cap at 10,000 to avoid
+  // fetching all records (e.g., 57K+ jobs) when the API ignores date filters.
+  // This is a count operation — precision above 10K doesn't matter for snapshots.
+  const MAX_COUNT_RECORDS = 10_000
+  const records = await paginate<UnknownRecord>(client, path, params, {
+    all: true,
+    limit: MAX_COUNT_RECORDS,
+    pageSize: 5000,
+  })
+  return records.length
 }
 
 function getErrorMessage(error: unknown): string {

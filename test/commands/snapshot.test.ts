@@ -5,11 +5,11 @@ import {getSnapshotSummary} from '../../src/lib/intelligence.js'
 describe('snapshot summary', () => {
   it('aggregates settled results and keeps partial failures', async () => {
     const get = vi.fn((path: string, params?: Record<string, unknown>) => {
-      if (path === '/jobs' && params?.jobStatus === 'Scheduled,InProgress') {
+      if (path === '/jobs' && params?.completedOnOrAfter === '2026-03-26' && params?.completedOnOrBefore === '2026-03-26') {
         return Promise.resolve({data: [], totalCount: 12})
       }
 
-      if (path === '/jobs' && params?.scheduledOnOrAfter === '2026-03-23' && params?.scheduledOnOrBefore === '2026-03-29') {
+      if (path === '/jobs' && params?.completedOnOrAfter === '2026-03-23' && params?.completedOnOrBefore === '2026-03-29') {
         return Promise.resolve({data: [], totalCount: 47})
       }
 
@@ -57,15 +57,14 @@ describe('snapshot summary', () => {
       pageSize: 1,
     })
     expect(get).toHaveBeenCalledWith('/jobs', {
-      scheduledOnOrAfter: '2026-03-26',
-      scheduledOnOrBefore: '2026-03-26',
-      jobStatus: 'Scheduled,InProgress',
+      completedOnOrAfter: '2026-03-26',
+      completedOnOrBefore: '2026-03-26',
       page: 1,
       pageSize: 1,
     })
     expect(get).toHaveBeenCalledWith('/jobs', {
-      scheduledOnOrAfter: '2026-03-23',
-      scheduledOnOrBefore: '2026-03-29',
+      completedOnOrAfter: '2026-03-23',
+      completedOnOrBefore: '2026-03-29',
       page: 1,
       pageSize: 1,
     })
