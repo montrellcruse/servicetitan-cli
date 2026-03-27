@@ -30,10 +30,10 @@ export default class ReportingRun extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(ReportingRun)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const from = typeof flags.from === 'string' ? assertDateString(flags.from, 'From date') : undefined
     const to = typeof flags.to === 'string' ? assertDateString(flags.to, 'To date') : undefined
-    const response = await client!.get<unknown>(`/report-category/${flags.category}`, {
+    const response = await this.requireClient().get<unknown>(`/report-category/${flags.category}`, {
       from,
       pageSize: flags.limit ?? 50,
       reportId: flags.report,

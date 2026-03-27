@@ -23,14 +23,14 @@ export default class JobTypesGet extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(JobTypesGet)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const jobTypeId = typeof args.id === 'string' ? args.id : undefined
 
     if (!jobTypeId) {
       throw new Error('Job type ID is required.')
     }
 
-    const jobType = await client!.get<UnknownRecord>(`/job-types/${jobTypeId}`)
+    const jobType = await this.requireClient().get<UnknownRecord>(`/job-types/${jobTypeId}`)
     const record = flags.full ? jobType : toJobTypeSummary(jobType)
 
     await this.renderRecord(record, {

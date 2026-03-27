@@ -38,10 +38,10 @@ export default class CustomersList extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(CustomersList)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const effectiveLimit = flags.all ? flags.limit : flags.limit ?? 50
     const customers = await paginate<UnknownRecord>(
-      client!,
+      this.requireClient(),
       '/customers',
       {
         search: flags.search,

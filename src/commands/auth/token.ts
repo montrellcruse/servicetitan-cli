@@ -9,8 +9,8 @@ export default class AuthToken extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(AuthToken)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
 
-    process.stdout.write(`${await client!.ensureToken()}\n`)
+    process.stdout.write(`${await this.requireClient().ensureToken()}\n`)
   }
 }

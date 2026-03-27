@@ -23,14 +23,14 @@ export default class CustomersGet extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(CustomersGet)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const customerId = typeof args.id === 'string' ? args.id : undefined
 
     if (!customerId) {
       throw new Error('Customer ID is required.')
     }
 
-    const customer = await client!.get<UnknownRecord>(`/customers/${customerId}`)
+    const customer = await this.requireClient().get<UnknownRecord>(`/customers/${customerId}`)
     const record = flags.full ? customer : toCustomerDetail(customer)
 
     await this.renderRecord(record, {

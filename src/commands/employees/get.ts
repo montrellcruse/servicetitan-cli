@@ -23,14 +23,14 @@ export default class EmployeesGet extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(EmployeesGet)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const employeeId = typeof args.id === 'string' ? args.id : undefined
 
     if (!employeeId) {
       throw new Error('Employee ID is required.')
     }
 
-    const employee = await client!.get<UnknownRecord>(`/employees/${employeeId}`)
+    const employee = await this.requireClient().get<UnknownRecord>(`/employees/${employeeId}`)
     const record = flags.full ? employee : toEmployeeSummary(employee)
 
     await this.renderRecord(record, {

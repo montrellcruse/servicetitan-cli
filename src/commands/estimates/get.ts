@@ -23,14 +23,14 @@ export default class EstimatesGet extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(EstimatesGet)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const estimateId = typeof args.id === 'string' ? args.id : undefined
 
     if (!estimateId) {
       throw new Error('Estimate ID is required.')
     }
 
-    const estimate = await client!.get<UnknownRecord>(`/estimates/${estimateId}`)
+    const estimate = await this.requireClient().get<UnknownRecord>(`/estimates/${estimateId}`)
     const record = flags.full ? estimate : toEstimateDetail(estimate)
 
     await this.renderRecord(record, {

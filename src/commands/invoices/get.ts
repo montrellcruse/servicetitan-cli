@@ -23,14 +23,14 @@ export default class InvoicesGet extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(InvoicesGet)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const invoiceId = typeof args.id === 'string' ? args.id : undefined
 
     if (!invoiceId) {
       throw new Error('Invoice ID is required.')
     }
 
-    const invoice = await client!.get<UnknownRecord>(`/invoices/${invoiceId}`)
+    const invoice = await this.requireClient().get<UnknownRecord>(`/invoices/${invoiceId}`)
     const record = flags.full ? invoice : toInvoiceDetail(invoice)
 
     await this.renderRecord(record, {

@@ -26,12 +26,12 @@ export default class InventoryPurchaseOrders extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(InventoryPurchaseOrders)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const {from, to} = resolveOptionalDateRange({
       from: flags.from,
       to: flags.to,
     })
-    const response = await client!.get<unknown>('/purchase-orders', {
+    const response = await this.requireClient().get<unknown>('/purchase-orders', {
       from,
       status: flags.status,
       to,

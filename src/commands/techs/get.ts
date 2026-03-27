@@ -24,16 +24,16 @@ export default class TechsGet extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(TechsGet)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const searchName = typeof flags.name === 'string' ? flags.name : undefined
     const technicianId = typeof args.id === 'string' ? args.id : undefined
     let technician: UnknownRecord | undefined
 
     if (searchName) {
-      const technicians = await paginate<UnknownRecord>(client!, '/technicians', {}, {all: true, pageSize: 5000})
+      const technicians = await paginate<UnknownRecord>(this.requireClient(), '/technicians', {}, {all: true, pageSize: 5000})
       technician = findByName(technicians, searchName)
     } else if (technicianId) {
-      technician = await client!.get<UnknownRecord>(`/technicians/${technicianId}`)
+      technician = await this.requireClient().get<UnknownRecord>(`/technicians/${technicianId}`)
     } else {
       throw new Error('Provide a technician ID or use --name.')
     }

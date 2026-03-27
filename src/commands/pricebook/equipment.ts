@@ -33,10 +33,10 @@ export default class PricebookEquipment extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(PricebookEquipment)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const effectiveLimit = flags.all ? flags.limit : flags.limit ?? 50
     const equipment = await paginate<UnknownRecord>(
-      client!,
+      this.requireClient(),
       '/equipment',
       {
         active: flags.active,

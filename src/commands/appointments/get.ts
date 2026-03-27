@@ -35,14 +35,14 @@ export default class AppointmentsGet extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(AppointmentsGet)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const appointmentId = typeof args.id === 'string' ? args.id : undefined
 
     if (!appointmentId) {
       throw new Error('Appointment ID is required.')
     }
 
-    const appointment = await client!.get<UnknownRecord>(`/appointments/${appointmentId}`)
+    const appointment = await this.requireClient().get<UnknownRecord>(`/appointments/${appointmentId}`)
     const record = flags.full ? appointment : toAppointmentSummary(appointment)
 
     await this.renderRecord(record, {

@@ -59,7 +59,7 @@ export default class JobsUpdate extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(JobsUpdate)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const jobId = typeof args.id === 'string' ? args.id : undefined
 
     if (!jobId) {
@@ -81,7 +81,7 @@ export default class JobsUpdate extends BaseCommand {
     }
 
     if (flags['dry-run']) {
-      printDryRun('PATCH', client!.resolvePath(path), body)
+      printDryRun('PATCH', this.requireClient().resolvePath(path), body)
       return
     }
 
@@ -91,7 +91,7 @@ export default class JobsUpdate extends BaseCommand {
       return
     }
 
-    const response = await client!.patch<unknown>(path, body)
+    const response = await this.requireClient().patch<unknown>(path, body)
     const job = toJobDetail(extractResponseRecords(response)[0] ?? response)
 
     printSuccess('Job updated.')

@@ -30,14 +30,14 @@ export default class TimesheetsList extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(TimesheetsList)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const {from, to} = resolveOptionalDateRange({
       from: flags.from,
       to: flags.to,
     })
     const limit = flags.limit ?? 50
     const activities = await paginate<UnknownRecord>(
-      client!,
+      this.requireClient(),
       '/activities',
       {
         from,

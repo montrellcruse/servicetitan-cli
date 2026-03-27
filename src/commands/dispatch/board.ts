@@ -26,9 +26,9 @@ export default class DispatchBoard extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(DispatchBoard)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const date = assertDateString(flags.date ?? getTodayDate(), 'Date')
-    const response = await client!.get<unknown>('/appointment-assignments', {
+    const response = await this.requireClient().get<unknown>('/appointment-assignments', {
       date,
       technicianId: flags.tech,
     })

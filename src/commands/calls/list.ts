@@ -27,14 +27,14 @@ export default class CallsList extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(CallsList)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const {from, to} = resolveOptionalDateRange({
       from: flags.from,
       to: flags.to,
     })
     const limit = flags.limit ?? 50
     const calls = await paginate<UnknownRecord>(
-      client!,
+      this.requireClient(),
       '/calls',
       {
         from,

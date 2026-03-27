@@ -63,7 +63,7 @@ export default class CustomersUpdate extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(CustomersUpdate)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const customerId = typeof args.id === 'string' ? args.id : undefined
 
     if (!customerId) {
@@ -83,7 +83,7 @@ export default class CustomersUpdate extends BaseCommand {
     }
 
     if (flags['dry-run']) {
-      printDryRun('PATCH', client!.resolvePath(path), body)
+      printDryRun('PATCH', this.requireClient().resolvePath(path), body)
       return
     }
 
@@ -93,7 +93,7 @@ export default class CustomersUpdate extends BaseCommand {
       return
     }
 
-    const response = await client!.patch<unknown>(path, body)
+    const response = await this.requireClient().patch<unknown>(path, body)
     const customer = toCustomerDetail(extractResponseRecords(response)[0] ?? response)
 
     printSuccess('Customer updated.')

@@ -19,14 +19,14 @@ export default class CustomersContacts extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(CustomersContacts)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const customerId = typeof args.id === 'string' ? args.id : undefined
 
     if (!customerId) {
       throw new Error('Customer ID is required.')
     }
 
-    const response = await client!.get<unknown>(`/customers/${customerId}/contacts`)
+    const response = await this.requireClient().get<unknown>(`/customers/${customerId}/contacts`)
     const contacts = extractResponseRecords(response)
 
     await this.renderRecords(contacts, {

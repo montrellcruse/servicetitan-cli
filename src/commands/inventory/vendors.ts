@@ -17,8 +17,8 @@ export default class InventoryVendors extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(InventoryVendors)
-    const {client} = await this.initializeRuntime(flags)
-    const response = await client!.get<unknown>('/vendors', {
+    await this.initializeRuntime(flags)
+    const response = await this.requireClient().get<unknown>('/vendors', {
       active: flags.active,
     })
     const vendors = extractResponseRecords(response)

@@ -24,10 +24,10 @@ export default class EmployeesList extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(EmployeesList)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const limit = flags.limit ?? 50
     const employees = await paginate<UnknownRecord>(
-      client!,
+      this.requireClient(),
       '/employees',
       {
         active: flags.active,

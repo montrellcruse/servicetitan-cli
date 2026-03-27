@@ -17,8 +17,8 @@ export default class JobTypesList extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(JobTypesList)
-    const {client} = await this.initializeRuntime(flags)
-    const response = await client!.get<unknown>('/job-types', {
+    await this.initializeRuntime(flags)
+    const response = await this.requireClient().get<unknown>('/job-types', {
       active: flags.active,
     })
     const jobTypes = extractResponseRecords(response)

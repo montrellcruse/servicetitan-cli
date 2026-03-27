@@ -10,8 +10,8 @@ export default class ReportingList extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(ReportingList)
-    const {client} = await this.initializeRuntime(flags)
-    const response = await client!.get<unknown>('/report-categories')
+    await this.initializeRuntime(flags)
+    const response = await this.requireClient().get<unknown>('/report-categories')
     const rows = toReportCategoryRows(response)
 
     await this.renderRecords(rows, {

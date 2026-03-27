@@ -33,6 +33,10 @@ export const baseFlags = {
     description: 'Output format',
     options: ['table', 'json', 'csv'],
   }),
+  json: Flags.boolean({
+    description: 'Output as JSON (shorthand for --output json)',
+    exclusive: ['output'],
+  }),
   profile: Flags.string({
     description: 'Profile name to use',
   }),
@@ -81,10 +85,19 @@ export abstract class BaseCommand extends Command {
     return Promise.resolve()
   }
 
+  protected requireClient(): ServiceTitanClient {
+    if (!this.client) {
+      throw new Error('Client not initialized. Call initializeRuntime() first.')
+    }
+
+    return this.client
+  }
+
   protected async initializeRuntime(
     flags: {
       color?: boolean
       compact?: boolean
+      json?: boolean
       output?: string
       profile?: string
     },
@@ -93,6 +106,10 @@ export abstract class BaseCommand extends Command {
     const config = await getConfig()
     const colorEnabled = flags.color ?? config.color
     this.outputFormat = resolveOutputFormat(flags.output, config)
+    if (flags.json) {
+      this.outputFormat = 'json'
+    }
+
     this.compact = Boolean((flags.compact ?? config.compact) || process.env.ST_AGENT_MODE === '1')
     this.configData = config
 
@@ -305,15 +322,23 @@ function formatCell(field: string, value: unknown): string {
 function getApiErrorTip(status: number | undefined): string | undefined {
   switch (status) {
     case 401: {
-      return 'Run `st auth login` to refresh your credentials for this profile.'
+      return 'Your access token may have expired. Try `st auth login` to re-authenticate.'
+    }
+
+    case 403: {
+      return 'Your app key may not have access to this resource. Check API permissions in the ServiceTitan developer portal.'
     }
 
     case 404: {
-      return 'Check the identifier and confirm you are using the correct tenant profile.'
+      return 'The resource was not found. Verify the ID and ensure it exists in your tenant.'
     }
 
     case 429: {
-      return 'Retry after the rate limit window resets, or reduce concurrent requests.'
+      return 'Rate limited by ServiceTitan. The CLI will retry automatically, but you may need to wait.'
+    }
+
+    case 500: {
+      return 'ServiceTitan API server error. This is usually temporary — try again in a few minutes.'
     }
 
     default: {

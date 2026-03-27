@@ -55,7 +55,7 @@ export default class LocationsUpdate extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(LocationsUpdate)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const locationId = typeof args.id === 'string' ? args.id : undefined
 
     if (!locationId) {
@@ -75,7 +75,7 @@ export default class LocationsUpdate extends BaseCommand {
     }
 
     if (flags['dry-run']) {
-      printDryRun('PATCH', client!.resolvePath(path), body)
+      printDryRun('PATCH', this.requireClient().resolvePath(path), body)
       return
     }
 
@@ -85,7 +85,7 @@ export default class LocationsUpdate extends BaseCommand {
       return
     }
 
-    const response = await client!.patch<unknown>(path, body)
+    const response = await this.requireClient().patch<unknown>(path, body)
     const location = toLocationDetail(extractResponseRecords(response)[0] ?? response)
 
     printSuccess('Location updated.')

@@ -17,9 +17,9 @@ export default class DispatchCapacity extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(DispatchCapacity)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const date = assertDateString(flags.date ?? getTodayDate(), 'Date')
-    const response = await client!.post<unknown>('/capacity', undefined, {
+    const response = await this.requireClient().post<unknown>('/capacity', undefined, {
       endsOnOrBefore: date,
       startsOnOrAfter: date,
     })

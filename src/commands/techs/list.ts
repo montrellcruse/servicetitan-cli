@@ -35,10 +35,10 @@ export default class TechsList extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(TechsList)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const effectiveLimit = flags.all ? flags.limit : flags.limit ?? 50
     const technicians = await paginate<UnknownRecord>(
-      client!,
+      this.requireClient(),
       '/technicians',
       {
         active: flags.active ? true : undefined,

@@ -33,10 +33,10 @@ export default class EstimatesList extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(EstimatesList)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const effectiveLimit = flags.all ? flags.limit : flags.limit ?? 50
     const estimates = await paginate<UnknownRecord>(
-      client!,
+      this.requireClient(),
       '/estimates',
       {
         jobId: flags.job,

@@ -34,12 +34,12 @@ export default class Revenue extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(Revenue)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const period = flags.period as RevenuePeriod
     const from = typeof flags.from === 'string' ? assertDateString(flags.from, 'From date') : undefined
     const to = typeof flags.to === 'string' ? assertDateString(flags.to, 'To date') : undefined
     const [summary] = await Promise.all([
-      getRevenueSummary(client!, {
+      getRevenueSummary(this.requireClient(), {
         from,
         period,
         to,

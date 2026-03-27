@@ -31,10 +31,10 @@ export default class BookingsList extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(BookingsList)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const effectiveLimit = flags.all ? flags.limit : flags.limit ?? 50
     const bookings = await paginate<UnknownRecord>(
-      client!,
+      this.requireClient(),
       '/bookings',
       {
         page: flags.page,

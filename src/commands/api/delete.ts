@@ -31,14 +31,14 @@ export default class ApiDelete extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(ApiDelete)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const path = typeof args.path === 'string' ? args.path : undefined
 
     if (!path) {
       throw new Error('Path is required.')
     }
 
-    const resolvedPath = client!.resolveRawPath(path)
+    const resolvedPath = this.requireClient().resolveRawPath(path)
 
     if (flags['dry-run']) {
       printDryRun('DELETE', resolvedPath)
@@ -51,7 +51,7 @@ export default class ApiDelete extends BaseCommand {
       return
     }
 
-    const response = await client!.deleteRaw<unknown>(path, parseParamsFlag(flags.params))
+    const response = await this.requireClient().deleteRaw<unknown>(path, parseParamsFlag(flags.params))
 
     if (!hasResponseBody(response)) {
       printSuccess('DELETE request succeeded.')

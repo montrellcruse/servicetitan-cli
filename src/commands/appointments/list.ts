@@ -33,14 +33,14 @@ export default class AppointmentsList extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(AppointmentsList)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const {from, to} = resolveOptionalDateRange({
       from: flags.from,
       to: flags.to,
     })
     const limit = flags.limit ?? 50
     const appointments = await paginate<UnknownRecord>(
-      client!,
+      this.requireClient(),
       '/appointments',
       {
         from,

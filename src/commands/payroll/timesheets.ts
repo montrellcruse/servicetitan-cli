@@ -20,12 +20,12 @@ export default class PayrollTimesheets extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(PayrollTimesheets)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const {from, to} = resolveOptionalDateRange({
       from: flags.from,
       to: flags.to,
     })
-    const response = await client!.get<unknown>('/jobs/timesheets', {
+    const response = await this.requireClient().get<unknown>('/jobs/timesheets', {
       from,
       to,
     })

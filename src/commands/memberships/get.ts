@@ -20,14 +20,14 @@ export default class MembershipsGet extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(MembershipsGet)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const membershipId = typeof args.id === 'string' ? args.id : undefined
 
     if (!membershipId) {
       throw new Error('Membership ID is required.')
     }
 
-    const membership = await client!.get<UnknownRecord>(`/memberships/${membershipId}`)
+    const membership = await this.requireClient().get<UnknownRecord>(`/memberships/${membershipId}`)
 
     await this.renderRecord(toMembershipDetail(membership), {
       defaultFields: ['id', 'type', 'customer', 'status', 'start', 'end', 'recurring', 'price', 'billingFrequency', 'created'],

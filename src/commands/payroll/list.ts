@@ -26,12 +26,12 @@ export default class PayrollList extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(PayrollList)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const {from, to} = resolveOptionalDateRange({
       from: flags.from,
       to: flags.to,
     })
-    const response = await client!.get<unknown>('/payrolls', {
+    const response = await this.requireClient().get<unknown>('/payrolls', {
       employeeId: flags.employee,
       from,
       technicianId: flags.technician,

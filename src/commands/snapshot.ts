@@ -25,9 +25,9 @@ export default class Snapshot extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(Snapshot)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const date = assertDateString(flags.date ?? getTodayDate(), 'Date')
-    const summary = await getSnapshotSummary(client!, date)
+    const summary = await getSnapshotSummary(this.requireClient(), date)
     const compactPayload = toCompactPayload(summary)
 
     if (this.compact) {

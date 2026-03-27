@@ -20,14 +20,14 @@ export default class LeadsGet extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(LeadsGet)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const leadId = typeof args.id === 'string' ? args.id : undefined
 
     if (!leadId) {
       throw new Error('Lead ID is required.')
     }
 
-    const lead = await client!.get<UnknownRecord>(`/leads/${leadId}`)
+    const lead = await this.requireClient().get<UnknownRecord>(`/leads/${leadId}`)
 
     await this.renderRecord(toLeadDetail(lead), {
       defaultFields: ['id', 'status', 'customer', 'campaign', 'created', 'phone', 'email', 'assignedTo', 'source'],

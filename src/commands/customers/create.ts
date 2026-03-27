@@ -57,7 +57,7 @@ export default class CustomersCreate extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(CustomersCreate)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const path = '/customers'
     const body = buildRequestBody([
       ['name', flags.name],
@@ -67,7 +67,7 @@ export default class CustomersCreate extends BaseCommand {
     ])
 
     if (flags['dry-run']) {
-      printDryRun('POST', client!.resolvePath(path), body)
+      printDryRun('POST', this.requireClient().resolvePath(path), body)
       return
     }
 
@@ -77,7 +77,7 @@ export default class CustomersCreate extends BaseCommand {
       return
     }
 
-    const response = await client!.post<unknown>(path, body)
+    const response = await this.requireClient().post<unknown>(path, body)
     const customer = toCustomerDetail(extractResponseRecords(response)[0] ?? response)
     const customerId = typeof customer.id === 'number' || typeof customer.id === 'string' ? customer.id : ''
 

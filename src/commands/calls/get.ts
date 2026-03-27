@@ -23,14 +23,14 @@ export default class CallsGet extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(CallsGet)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const callId = typeof args.id === 'string' ? args.id : undefined
 
     if (!callId) {
       throw new Error('Call ID is required.')
     }
 
-    const call = await client!.get<UnknownRecord>(`/calls/${callId}`)
+    const call = await this.requireClient().get<UnknownRecord>(`/calls/${callId}`)
     const record = flags.full ? call : toCallSummary(call)
 
     await this.renderRecord(record, {

@@ -37,10 +37,10 @@ export default class MembershipsList extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(MembershipsList)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const effectiveLimit = flags.all ? flags.limit : flags.limit ?? 50
     const memberships = await paginate<UnknownRecord>(
-      client!,
+      this.requireClient(),
       '/memberships',
       {
         active: flags.active,

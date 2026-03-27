@@ -30,7 +30,7 @@ export default class BookingsDismiss extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(BookingsDismiss)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const bookingId = typeof args.id === 'string' ? args.id : undefined
 
     if (!bookingId) {
@@ -44,7 +44,7 @@ export default class BookingsDismiss extends BaseCommand {
     ])
 
     if (flags['dry-run']) {
-      printDryRun('PATCH', client!.resolvePath(path), body)
+      printDryRun('PATCH', this.requireClient().resolvePath(path), body)
       return
     }
 
@@ -54,7 +54,7 @@ export default class BookingsDismiss extends BaseCommand {
       return
     }
 
-    await client!.patch<unknown>(path, body)
+    await this.requireClient().patch<unknown>(path, body)
     printSuccess(`Booking ${bookingId} dismissed.`)
   }
 }

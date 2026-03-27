@@ -30,10 +30,10 @@ export default class LeadsList extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(LeadsList)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const effectiveLimit = flags.all ? flags.limit : flags.limit ?? 50
     const leads = await paginate<UnknownRecord>(
-      client!,
+      this.requireClient(),
       '/leads',
       {
         page: flags.page,

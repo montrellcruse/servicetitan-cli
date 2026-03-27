@@ -23,14 +23,14 @@ export default class BusinessUnitsGet extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(BusinessUnitsGet)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const businessUnitId = typeof args.id === 'string' ? args.id : undefined
 
     if (!businessUnitId) {
       throw new Error('Business unit ID is required.')
     }
 
-    const businessUnit = await client!.get<UnknownRecord>(`/business-units/${businessUnitId}`)
+    const businessUnit = await this.requireClient().get<UnknownRecord>(`/business-units/${businessUnitId}`)
     const record = flags.full ? businessUnit : toBusinessUnitSummary(businessUnit)
 
     await this.renderRecord(record, {

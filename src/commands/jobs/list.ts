@@ -42,7 +42,7 @@ export default class JobsList extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(JobsList)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const statusValue = typeof flags.status === 'string' ? flags.status : undefined
     const dateValue =
       typeof flags.date === 'string' ? assertDateString(flags.date, 'Date') : undefined
@@ -52,7 +52,7 @@ export default class JobsList extends BaseCommand {
     const effectiveLimit = flags.all ? flags.limit : flags.limit ?? 50
 
     const jobs = await paginate<UnknownRecord>(
-      client!,
+      this.requireClient(),
       '/jobs',
       {
         status: statusValue

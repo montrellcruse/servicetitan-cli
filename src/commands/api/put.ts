@@ -31,14 +31,14 @@ export default class ApiPut extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(ApiPut)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const path = typeof args.path === 'string' ? args.path : undefined
 
     if (!path) {
       throw new Error('Path is required.')
     }
 
-    const resolvedPath = client!.resolveRawPath(path)
+    const resolvedPath = this.requireClient().resolveRawPath(path)
     const body = parseRequestBody(flags.body)
 
     if (flags['dry-run']) {
@@ -52,7 +52,7 @@ export default class ApiPut extends BaseCommand {
       return
     }
 
-    const response = await client!.putRaw<unknown>(path, body)
+    const response = await this.requireClient().putRaw<unknown>(path, body)
     await this.renderPayload(response)
   }
 }

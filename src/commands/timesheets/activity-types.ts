@@ -10,8 +10,8 @@ export default class TimesheetsActivityTypes extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(TimesheetsActivityTypes)
-    const {client} = await this.initializeRuntime(flags)
-    const response = await client!.get<unknown>('/activity-types')
+    await this.initializeRuntime(flags)
+    const response = await this.requireClient().get<unknown>('/activity-types')
     const activityTypes = extractResponseRecords(response)
 
     await this.renderRecords(activityTypes, {

@@ -36,14 +36,14 @@ export default class LocationsGet extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(LocationsGet)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const locationId = typeof args.id === 'string' ? args.id : undefined
 
     if (!locationId) {
       throw new Error('Location ID is required.')
     }
 
-    const location = await client!.get<UnknownRecord>(`/locations/${locationId}`)
+    const location = await this.requireClient().get<UnknownRecord>(`/locations/${locationId}`)
     const record = flags.full ? location : toLocationDetail(location)
 
     await this.renderRecord(record, {

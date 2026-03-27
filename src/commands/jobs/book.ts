@@ -65,7 +65,7 @@ export default class JobsBook extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(JobsBook)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const scheduledDate = assertDateString(flags.date, 'Date')
     const path = '/jobs'
     const body = buildRequestBody([
@@ -80,7 +80,7 @@ export default class JobsBook extends BaseCommand {
     ])
 
     if (flags['dry-run']) {
-      printDryRun('POST', client!.resolvePath(path), body)
+      printDryRun('POST', this.requireClient().resolvePath(path), body)
       return
     }
 
@@ -93,7 +93,7 @@ export default class JobsBook extends BaseCommand {
       return
     }
 
-    const response = await client!.post<unknown>(path, body)
+    const response = await this.requireClient().post<unknown>(path, body)
     const job = toJobDetail(extractResponseRecords(response)[0] ?? response)
     const jobId = typeof job.id === 'number' || typeof job.id === 'string' ? job.id : ''
 

@@ -20,14 +20,14 @@ export default class BookingsGet extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(BookingsGet)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const bookingId = typeof args.id === 'string' ? args.id : undefined
 
     if (!bookingId) {
       throw new Error('Booking ID is required.')
     }
 
-    const booking = await client!.get<UnknownRecord>(`/bookings/${bookingId}`)
+    const booking = await this.requireClient().get<UnknownRecord>(`/bookings/${bookingId}`)
 
     await this.renderRecord(toBookingDetail(booking), {
       defaultFields: ['id', 'status', 'customer', 'source', 'created', 'phone', 'email', 'address', 'notes'],

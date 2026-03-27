@@ -47,7 +47,7 @@ export default class LocationsCreate extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(LocationsCreate)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const path = '/locations'
     const body = buildRequestBody([
       ['name', flags.name],
@@ -56,7 +56,7 @@ export default class LocationsCreate extends BaseCommand {
     ])
 
     if (flags['dry-run']) {
-      printDryRun('POST', client!.resolvePath(path), body)
+      printDryRun('POST', this.requireClient().resolvePath(path), body)
       return
     }
 
@@ -69,7 +69,7 @@ export default class LocationsCreate extends BaseCommand {
       return
     }
 
-    const response = await client!.post<unknown>(path, body)
+    const response = await this.requireClient().post<unknown>(path, body)
     const location = toLocationDetail(extractResponseRecords(response)[0] ?? response)
     const locationId = typeof location.id === 'number' || typeof location.id === 'string' ? location.id : ''
 

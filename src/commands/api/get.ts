@@ -27,14 +27,14 @@ export default class ApiGet extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(ApiGet)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const path = typeof args.path === 'string' ? args.path : undefined
 
     if (!path) {
       throw new Error('Path is required.')
     }
 
-    const response = await client!.getRaw<unknown>(path, parseParamsFlag(flags.params))
+    const response = await this.requireClient().getRaw<unknown>(path, parseParamsFlag(flags.params))
     await this.renderPayload(response)
   }
 }

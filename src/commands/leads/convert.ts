@@ -26,7 +26,7 @@ export default class LeadsConvert extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(LeadsConvert)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const leadId = typeof args.id === 'string' ? args.id : undefined
 
     if (!leadId) {
@@ -37,7 +37,7 @@ export default class LeadsConvert extends BaseCommand {
     const body = {}
 
     if (flags['dry-run']) {
-      printDryRun('POST', client!.resolvePath(path), body)
+      printDryRun('POST', this.requireClient().resolvePath(path), body)
       return
     }
 
@@ -47,7 +47,7 @@ export default class LeadsConvert extends BaseCommand {
       return
     }
 
-    await client!.post<unknown>(path, body)
+    await this.requireClient().post<unknown>(path, body)
     printSuccess(`Lead ${leadId} converted.`)
   }
 }

@@ -19,8 +19,8 @@ export default class MembershipsRecurringServices extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(MembershipsRecurringServices)
-    const {client} = await this.initializeRuntime(flags)
-    const response = await client!.get<unknown>('/recurring-services', {
+    await this.initializeRuntime(flags)
+    const response = await this.requireClient().get<unknown>('/recurring-services', {
       active: flags.active,
       membershipId: flags.membership,
     })

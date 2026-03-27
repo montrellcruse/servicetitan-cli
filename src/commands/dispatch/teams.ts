@@ -10,8 +10,8 @@ export default class DispatchTeams extends BaseCommand {
 
   public async run(): Promise<void> {
     const {flags} = await this.parse(DispatchTeams)
-    const {client} = await this.initializeRuntime(flags)
-    const response = await client!.get<unknown>('/teams')
+    await this.initializeRuntime(flags)
+    const response = await this.requireClient().get<unknown>('/teams')
     const teams = extractResponseRecords(response)
 
     await this.renderRecords(teams, {

@@ -29,7 +29,7 @@ export default class JobsCancel extends BaseCommand {
 
   public async run(): Promise<void> {
     const {args, flags} = await this.parse(JobsCancel)
-    const {client} = await this.initializeRuntime(flags)
+    await this.initializeRuntime(flags)
     const jobId = typeof args.id === 'string' ? args.id : undefined
 
     if (!jobId) {
@@ -40,7 +40,7 @@ export default class JobsCancel extends BaseCommand {
     const body = flags.reason ? {reason: flags.reason} : {}
 
     if (flags['dry-run']) {
-      printDryRun('POST', client!.resolvePath(path), body)
+      printDryRun('POST', this.requireClient().resolvePath(path), body)
       return
     }
 
@@ -53,7 +53,7 @@ export default class JobsCancel extends BaseCommand {
       return
     }
 
-    await client!.post<unknown>(path, body)
+    await this.requireClient().post<unknown>(path, body)
     printSuccess(`Job ${jobId} cancelled.`)
   }
 }
