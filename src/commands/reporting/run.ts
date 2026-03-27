@@ -33,14 +33,22 @@ export default class ReportingRun extends BaseCommand {
     await this.initializeRuntime(flags)
     const from = typeof flags.from === 'string' ? assertDateString(flags.from, 'From date') : undefined
     const to = typeof flags.to === 'string' ? assertDateString(flags.to, 'To date') : undefined
-    const response = await this.requireClient().get<unknown>(`/report-category/${flags.category}`, {
-      from,
-      pageSize: flags.limit ?? 50,
-      reportId: flags.report,
-      to,
-    })
 
-    await this.renderPayload(limitResponseRows(response, flags.limit ?? 50))
+    // ST Reporting API uses POST with parameters in the body
+    const parameters: Array<{name: string; value: string}> = []
+    if (from) parameters.push({name: 'From', value: from})
+    if (to) parameters.push({name: 'To', value: to})
+
+    const response = await this.requireClient().post<unknown>(
+      `/report-category/${flags.category}/reports/${flags.report}/data`,
+      {parameters},
+    )
+
+    // ST Reporting API returns {fields, data, page, ...} — extract the data rows
+    const rows = isUnknownRecord(response) && Array.isArray(response.data)
+      ? (response.data as unknown[]).slice(0, flags.limit ?? 50)
+      : limitResponseRows(response, flags.limit ?? 50)
+    await this.renderPayload(rows)
   }
 }
 

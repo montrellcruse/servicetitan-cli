@@ -35,19 +35,20 @@ describe('reporting commands', () => {
     expect(rendered).toContain('Revenue by Technician')
   })
 
-  it('runs a report and renders the response payload', async () => {
-    const getSpy = vi.fn().mockResolvedValue({
+  it('runs a report and renders the data rows as JSON', async () => {
+    const postSpy = vi.fn().mockResolvedValue({
+      fields: ['technician', 'completedJobs', 'completedRevenue'],
       data: [
-        {
-          completedJobs: 96,
-          completedRevenue: 84210.44,
-          technician: 'Ava Thompson',
-        },
+        ['Ava Thompson', 96, 84210.44],
       ],
+      page: 1,
+      pageSize: 50,
+      hasMore: false,
+      totalCount: 1,
     })
     const {output} = createTestContext({
       client: {
-        get: getSpy,
+        post: postSpy,
       },
     })
 
@@ -56,20 +57,10 @@ describe('reporting commands', () => {
       process.cwd(),
     )
 
-    expect(getSpy).toHaveBeenCalledWith('/report-category/operations', {
-      from: '2026-03-01',
-      pageSize: 50,
-      reportId: '175',
-      to: '2026-03-31',
-    })
-    expect(JSON.parse(output())).toEqual({
-      data: [
-        {
-          completedJobs: 96,
-          completedRevenue: 84210.44,
-          technician: 'Ava Thompson',
-        },
-      ],
-    })
+    expect(postSpy).toHaveBeenCalledWith(
+      '/report-category/operations/reports/175/data',
+      {parameters: [{name: 'From', value: '2026-03-01'}, {name: 'To', value: '2026-03-31'}]},
+    )
+    expect(JSON.parse(output())).toEqual([['Ava Thompson', 96, 84210.44]])
   })
 })

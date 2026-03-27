@@ -111,7 +111,7 @@ const CASES: CommandCase[] = [
     argv: ['--page', '2', '--limit', '10'],
     command: MembershipsList,
     label: 'memberships list',
-    params: {active: true, customerId: undefined, page: 2, pageSize: 10, type: undefined},
+    params: {status: undefined, customerId: undefined, page: 2, pageSize: 10, type: undefined},
     path: '/memberships',
   },
   {

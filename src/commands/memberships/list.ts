@@ -11,9 +11,7 @@ export default class MembershipsList extends BaseCommand {
   public static override flags = {
     ...baseFlags,
     active: Flags.boolean({
-      allowNo: true,
-      default: true,
-      description: 'Only include active memberships',
+      description: 'Only include active memberships (status=Active)',
     }),
     customer: Flags.integer({
       description: 'Customer ID filter',
@@ -43,7 +41,7 @@ export default class MembershipsList extends BaseCommand {
       this.requireClient(),
       '/memberships',
       {
-        active: flags.active,
+        status: flags.active ? 'Active' : undefined,
         customerId: flags.customer,
         page: flags.page,
         type: flags.type,

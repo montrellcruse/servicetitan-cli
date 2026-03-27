@@ -23,7 +23,7 @@ describe('memberships commands', () => {
     await MembershipsList.run([], process.cwd())
 
     expect(getSpy).toHaveBeenCalledWith('/memberships', {
-      active: true,
+      status: undefined,
       customerId: undefined,
       page: 1,
       pageSize: 50,
@@ -32,6 +32,24 @@ describe('memberships commands', () => {
     const rendered = stripAnsi(output())
     expect(rendered).toContain('Comfort Club Gold')
     expect(rendered).toContain('Harper Family')
+  })
+
+  it('passes status=Active when --active flag is used', async () => {
+    const getSpy = vi.fn().mockResolvedValue({
+      data: [createMembership()],
+      hasMore: false,
+    })
+    createTestContext({client: {get: getSpy}})
+
+    await MembershipsList.run(['--active'], process.cwd())
+
+    expect(getSpy).toHaveBeenCalledWith('/memberships', {
+      status: 'Active',
+      customerId: undefined,
+      page: 1,
+      pageSize: 50,
+      type: undefined,
+    })
   })
 
   it('renders a membership types table for memberships types', async () => {
