@@ -9,3 +9,5 @@ coverage/
 .github/
 *.map
 **/*.map
+dist/__mocks__/
+src/__mocks__/

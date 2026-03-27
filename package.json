@@ -26,7 +26,10 @@
   },
   "files": [
     "bin",
-    "dist"
+    "dist",
+    "!dist/__mocks__",
+    "README.md",
+    "CHANGELOG.md"
   ],
   "exports": "./dist/index.js",
   "engines": {
