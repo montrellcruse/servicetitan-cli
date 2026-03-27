@@ -51,6 +51,7 @@
     "@types/node": "^22.10.2",
     "@typescript-eslint/eslint-plugin": "^8.18.2",
     "@typescript-eslint/parser": "^8.18.2",
+    "@vitest/coverage-v8": "^2.1.9",
     "eslint": "^8.57.1",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
@@ -60,6 +61,7 @@
     "clean": "rm -rf dist coverage",
     "lint": "eslint src test --ext .ts",
     "test": "vitest run",
+    "coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
   "oclif": {

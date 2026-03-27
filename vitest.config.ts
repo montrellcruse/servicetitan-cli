@@ -8,5 +8,17 @@ export default defineConfig({
       // Prevent native keytar binary from loading in tests
       keytar: new URL('./src/__mocks__/keytar.ts', import.meta.url).pathname,
     },
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'text-summary', 'lcov'],
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/*.d.ts', 'src/types/**'],
+      thresholds: {
+        statements: 50,
+        branches: 40,
+        functions: 50,
+        lines: 50,
+      },
+    },
   },
 })
