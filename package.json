@@ -1,0 +1,53 @@
+{
+  "name": "@rowvyn/servicetitan-cli",
+  "version": "0.1.0",
+  "description": "ServiceTitan CLI",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "st": "./bin/run.js"
+  },
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "exports": "./dist/index.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@oclif/core": "^3.0.0",
+    "@oclif/plugin-help": "^6.0.0",
+    "axios": "^1.7.9",
+    "chalk": "^5.4.1",
+    "cli-table3": "^0.6.5",
+    "csv-stringify": "^6.5.2",
+    "keytar": "^7.9.0",
+    "ora": "^8.1.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@typescript-eslint/eslint-plugin": "^8.18.2",
+    "@typescript-eslint/parser": "^8.18.2",
+    "eslint": "^8.57.1",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist coverage",
+    "lint": "eslint src test --ext .ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "oclif": {
+    "bin": "st",
+    "dirname": "st",
+    "commands": "./dist/commands",
+    "plugins": [
+      "@oclif/plugin-help"
+    ],
+    "topicSeparator": " "
+  }
+}
