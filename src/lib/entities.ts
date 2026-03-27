@@ -54,11 +54,7 @@ export function toLocationDetail(input: unknown): UnknownRecord {
 }
 
 export function toJobSummary(input: unknown): UnknownRecord {
-  // ST API v2: jobStatus (not status), customerId/jobTypeId are IDs; fall back to nested objects for test fixtures
-  const appointments = Array.isArray(getPathValue(input, 'appointments')) ? (getPathValue(input, 'appointments') as UnknownRecord[]) : []
-  const scheduled =
-    getString(appointments[0], ['start', 'scheduledDate', 'startsOn']) ??
-    getString(input, ['scheduledOn', 'scheduledDate', 'startTime']) ?? ''
+  // ST jobs list endpoint returns IDs only; use 'st jobs get <id>' for resolved names.
   const customer =
     getString(input, ['customer.name', 'customerName']) ??
     String(getNumber(input, ['customerId']) ?? getString(input, ['customerId']) ?? '')
@@ -70,8 +66,10 @@ export function toJobSummary(input: unknown): UnknownRecord {
     status: getString(input, ['jobStatus', 'status']) ?? '',
     customer,
     type,
-    scheduled,
-    total: getNumber(input, ['total', 'totalAmount', 'invoice.total']) ?? 0,
+    scheduled: getString(input, ['scheduledDate', 'completedOn', 'createdOn']) ?? '',
+    total: parseCurrencyValue(
+      getPathValue(input, 'total') ?? getPathValue(input, 'totalAmount') ?? getPathValue(input, 'invoice.total'),
+    ),
   }
 }
 
@@ -89,9 +87,13 @@ export function toJobDetail(input: unknown): UnknownRecord {
 }
 
 export function toInvoiceSummary(input: unknown): UnknownRecord {
-  // ST API: status may be string or nested {value: "..."}
   const statusRaw = getPathValue(input, 'status')
-  const status = typeof statusRaw === 'string' ? statusRaw : (getString(statusRaw, ['value', 'name']) ?? '')
+  const status =
+    typeof statusRaw === 'object' && statusRaw !== null
+      ? (getString(statusRaw, ['name', 'value']) ?? '')
+      : (typeof statusRaw === 'string'
+          ? statusRaw
+          : (getString(input, ['syncStatus', 'sentStatus', 'reviewStatus']) ?? ''))
   const customer =
     getString(input, ['customer.name', 'customerName']) ??
     String(getNumber(input, ['customerId']) ?? getString(input, ['customerId']) ?? '')
@@ -99,8 +101,13 @@ export function toInvoiceSummary(input: unknown): UnknownRecord {
     id: getNumber(input, ['id']) ?? getString(input, ['id']) ?? '',
     status,
     customer,
-    total: getNumber(input, ['total', 'totalAmount', 'invoiceTotal']) ?? 0,
-    balance: getNumber(input, ['balance', 'balanceAmount']) ?? 0,
+    total: parseCurrencyValue(
+      getPathValue(input, 'total') ?? getPathValue(input, 'totalAmount') ?? getPathValue(input, 'invoiceTotal'),
+    ),
+    balance: parseCurrencyValue(getPathValue(input, 'balance') ?? getPathValue(input, 'balanceAmount')),
+    subTotal: parseCurrencyValue(
+      getPathValue(input, 'subTotal') ?? getPathValue(input, 'subtotal') ?? getPathValue(input, 'subTotalAmount'),
+    ),
     created: getString(input, ['createdOn', 'createdAt', 'createdDate']) ?? '',
   }
 }
@@ -200,9 +207,11 @@ export function toMembershipTypeSummary(input: unknown): UnknownRecord {
 }
 
 export function toEstimateSummary(input: unknown): UnknownRecord {
-  // ST API: status may be nested {value: "..."}, customerId is an ID
   const statusRaw = getPathValue(input, 'status')
-  const status = typeof statusRaw === 'string' ? statusRaw : (getString(statusRaw, ['value', 'name']) ?? '')
+  const status =
+    typeof statusRaw === 'object' && statusRaw !== null
+      ? (getString(statusRaw, ['name']) ?? String(getString(statusRaw, ['value']) ?? ''))
+      : (typeof statusRaw === 'string' ? statusRaw : '')
   const customer =
     getString(input, ['customer.name', 'customerName']) ??
     String(getNumber(input, ['customerId']) ?? getString(input, ['customerId']) ?? '')
@@ -324,7 +333,6 @@ export function toPricebookEquipmentSummary(input: unknown): UnknownRecord {
 }
 
 export function toAppointmentAssignmentSummary(input: unknown): UnknownRecord {
-  // ST dispatch board: appointments have start/end or arrivalWindowStart/arrivalWindowEnd
   const statusRaw = getPathValue(input, 'status')
   const status = typeof statusRaw === 'string' ? statusRaw : (getString(statusRaw, ['value', 'name']) ?? '')
   return {
@@ -333,8 +341,7 @@ export function toAppointmentAssignmentSummary(input: unknown): UnknownRecord {
     tech:
       getString(input, ['technician.name', 'technicianName', 'employee.name', 'assignedTechnician.name']) ??
       '',
-    start: getString(input, ['start', 'arrivalWindowStart', 'startTime', 'startsOn', 'scheduledStart']) ?? '',
-    end: getString(input, ['end', 'arrivalWindowEnd', 'endTime', 'endsOn', 'scheduledEnd']) ?? '',
+    assignedOn: getString(input, ['assignedOn', 'createdOn']) ?? '',
     status,
   }
 }
@@ -464,6 +471,18 @@ function getArrayValue(input: unknown, paths: string[]): unknown[] {
   }
 
   return []
+}
+
+function parseCurrencyValue(value: unknown): number {
+  if (typeof value === 'number') {
+    return value
+  }
+
+  if (typeof value === 'string') {
+    return parseFloat(value.replace(/[$,]/g, '')) || 0
+  }
+
+  return 0
 }
 
 function toReportRows(input: unknown): UnknownRecord[] {

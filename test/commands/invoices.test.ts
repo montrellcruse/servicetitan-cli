@@ -11,7 +11,7 @@ describe('invoices commands', () => {
 
   it('renders an invoices table for invoices list', async () => {
     const getSpy = vi.fn().mockResolvedValue({
-      data: [createInvoice()],
+      data: [createListInvoice()],
       hasMore: false,
     })
     const {output} = createTestContext({
@@ -28,12 +28,14 @@ describe('invoices commands', () => {
       status: undefined,
     })
     const rendered = stripAnsi(output())
+    expect(rendered).toContain('Exported')
     expect(rendered).toContain('Parkview Dental')
-    expect(rendered).toContain('620')
+    expect(rendered).toContain('$1,240.00')
+    expect(rendered).toContain('$620.00')
   })
 
   it('fetches and renders a single invoice', async () => {
-    const getSpy = vi.fn().mockResolvedValue(createInvoice())
+    const getSpy = vi.fn().mockResolvedValue(createDetailInvoice())
     const {output} = createTestContext({
       client: {
         get: getSpy,
@@ -49,9 +51,22 @@ describe('invoices commands', () => {
   })
 })
 
-function createInvoice() {
+function createListInvoice() {
   return {
-    balance: 620,
+    balance: '$620.00',
+    createdOn: '2026-03-24T17:44:18Z',
+    customer: {
+      name: 'Parkview Dental',
+    },
+    id: 992417,
+    syncStatus: 'Exported',
+    total: '$1,240.00',
+  }
+}
+
+function createDetailInvoice() {
+  return {
+    balance: '$620.00',
     createdOn: '2026-03-24T17:44:18Z',
     customer: {
       name: 'Parkview Dental',
@@ -61,6 +76,6 @@ function createInvoice() {
     invoiceNumber: 'INV-104982',
     jobId: 845118,
     status: 'unpaid',
-    total: 1240,
+    total: '$1,240.00',
   }
 }

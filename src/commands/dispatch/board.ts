@@ -35,7 +35,7 @@ export default class DispatchBoard extends BaseCommand {
     const assignments = extractResponseRecords(response)
 
     await this.renderRecords(assignments.map(assignment => toAppointmentAssignmentSummary(assignment)), {
-      defaultFields: ['appointment', 'job', 'tech', 'start', 'end', 'status'],
+      defaultFields: ['appointment', 'job', 'tech', 'assignedOn', 'status'],
     })
   }
 }

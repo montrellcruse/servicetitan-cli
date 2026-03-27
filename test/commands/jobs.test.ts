@@ -11,7 +11,7 @@ describe('jobs commands', () => {
 
   it('renders a jobs table for jobs list', async () => {
     const getSpy = vi.fn().mockResolvedValue({
-      data: [createJob()],
+      data: [createListJob()],
       hasMore: false,
     })
     const {output} = createTestContext({
@@ -31,13 +31,17 @@ describe('jobs commands', () => {
       to: undefined,
     })
     const rendered = stripAnsi(output())
-    expect(rendered).toContain('Parkview Dental')
+    expect(rendered).toContain('9912')
+    expect(rendered).toContain('87')
+    expect(rendered).toContain('2026-03-26 10:30')
+    expect(rendered).toContain('$1,240.00')
     expect(rendered).toContain('Scheduled')
+    expect(rendered).not.toContain('Parkview Dental')
   })
 
   it('passes the status filter through jobs list', async () => {
     const getSpy = vi.fn().mockResolvedValue({
-      data: [createJob()],
+      data: [createListJob()],
       hasMore: false,
     })
     createTestContext({
@@ -60,7 +64,7 @@ describe('jobs commands', () => {
 
   it('translates date-range into from/to filters', async () => {
     const getSpy = vi.fn().mockResolvedValue({
-      data: [createJob()],
+      data: [createListJob()],
       hasMore: false,
     })
     createTestContext({
@@ -82,7 +86,7 @@ describe('jobs commands', () => {
   })
 
   it('fetches and renders a single job', async () => {
-    const getSpy = vi.fn().mockResolvedValue(createJob())
+    const getSpy = vi.fn().mockResolvedValue(createDetailJob())
     const {output} = createTestContext({
       client: {
         get: getSpy,
@@ -99,7 +103,19 @@ describe('jobs commands', () => {
   })
 })
 
-function createJob() {
+function createListJob() {
+  return {
+    createdOn: '2026-03-25T18:02:14Z',
+    customerId: 9912,
+    id: 845118,
+    jobStatus: 'Scheduled',
+    jobTypeId: 87,
+    scheduledDate: '2026-03-26T10:30:00Z',
+    total: '$1,240.00',
+  }
+}
+
+function createDetailJob() {
   return {
     businessUnit: {
       name: 'Commercial HVAC',
@@ -112,12 +128,12 @@ function createJob() {
     jobType: {
       name: 'RTU Cooling Repair',
     },
-    scheduledOn: '2026-03-26T10:30:00Z',
-    status: 'Scheduled',
+    jobStatus: 'Scheduled',
+    scheduledDate: '2026-03-26T10:30:00Z',
     summary: 'Rear rooftop package unit not cooling',
     technician: {
       name: 'Ava Thompson',
     },
-    total: 1240,
+    total: '$1,240.00',
   }
 }

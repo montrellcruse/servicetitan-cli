@@ -26,8 +26,10 @@ describe('dispatch commands', () => {
       technicianId: undefined,
     })
     const rendered = stripAnsi(output())
+    expect(rendered).toContain('Assigned On')
     expect(rendered).toContain('Ava Thompson')
-    expect(rendered).toContain('2026-03-26 09:00')
+    expect(rendered).toContain('2026-03-26 08:45')
+    expect(rendered).not.toContain('Start')
   })
 
   it('renders dispatch capacity for a given date', async () => {
@@ -55,9 +57,8 @@ describe('dispatch commands', () => {
 function createAssignment() {
   return {
     appointmentId: 401992,
-    end: '2026-03-26T10:30:00Z',
+    assignedOn: '2026-03-26T08:45:00Z',
     jobId: 845102,
-    start: '2026-03-26T09:00:00Z',
     status: 'Scheduled',
     technician: {
       name: 'Ava Thompson',
