@@ -14,7 +14,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/montrellcruse/servicetitan-cli"
+    "url": "git+https://github.com/montrellcruse/servicetitan-cli.git"
   },
   "homepage": "https://github.com/montrellcruse/servicetitan-cli#readme",
   "bugs": {
@@ -22,7 +22,7 @@
   },
   "type": "module",
   "bin": {
-    "st": "./bin/run.js"
+    "st": "bin/run.js"
   },
   "files": [
     "bin",
