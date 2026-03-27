@@ -1,6 +1,13 @@
 import {describe, expect, it} from 'vitest'
 
-import {toCustomerDetail, toJobDetail, toReportCategoryRows} from '../../src/lib/entities.js'
+import {
+  toAppointmentSummary,
+  toCustomerDetail,
+  toEmployeeSummary,
+  toJobDetail,
+  toLocationDetail,
+  toReportCategoryRows,
+} from '../../src/lib/entities.js'
 
 describe('entity mappers', () => {
   it('returns stable empty defaults for sparse inputs', () => {
@@ -28,6 +35,40 @@ describe('entity mappers', () => {
       technician: '',
       total: 0,
       type: '',
+    })
+
+    expect(toLocationDetail({})).toEqual({
+      active: false,
+      address: '',
+      city: '',
+      contacts: [],
+      customerId: '',
+      id: '',
+      name: '',
+      notes: [],
+      state: '',
+      zip: '',
+    })
+
+    expect(toEmployeeSummary({})).toEqual({
+      active: false,
+      email: '',
+      id: '',
+      name: '',
+      phoneNumber: '',
+      role: '',
+    })
+
+    expect(toAppointmentSummary({})).toEqual({
+      appointmentNumber: '',
+      arrivalWindowEnd: '',
+      arrivalWindowStart: '',
+      end: '',
+      id: '',
+      isConfirmed: false,
+      jobId: '',
+      start: '',
+      status: '',
     })
   })
 

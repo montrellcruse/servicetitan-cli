@@ -32,6 +32,27 @@ export function toCustomerDetail(input: unknown): UnknownRecord {
   }
 }
 
+export function toLocationSummary(input: unknown): UnknownRecord {
+  return {
+    id: getIdentifier(input, ['id', 'locationId']),
+    name: getString(input, ['name', 'displayName']) ?? '',
+    address: getString(input, ['address.street', 'address.line1', 'street']) ?? '',
+    city: getString(input, ['address.city', 'city']) ?? '',
+    state: getString(input, ['address.state', 'state']) ?? '',
+    zip: getString(input, ['address.zip', 'address.postalCode', 'zip']) ?? '',
+    customerId: getIdentifier(input, ['customer.id', 'customerId']),
+    active: getBoolean(input, ['active', 'isActive']) ?? false,
+  }
+}
+
+export function toLocationDetail(input: unknown): UnknownRecord {
+  return {
+    ...toLocationSummary(input),
+    contacts: getArrayValue(input, ['contacts']),
+    notes: getArrayValue(input, ['notes', 'memoNotes']),
+  }
+}
+
 export function toJobSummary(input: unknown): UnknownRecord {
   // ST API v2: jobStatus (not status), customerId/jobTypeId are IDs; fall back to nested objects for test fixtures
   const appointments = Array.isArray(getPathValue(input, 'appointments')) ? (getPathValue(input, 'appointments') as UnknownRecord[]) : []
@@ -111,6 +132,30 @@ export function toTechnicianDetail(input: unknown): UnknownRecord {
   }
 }
 
+export function toBusinessUnitSummary(input: unknown): UnknownRecord {
+  return {
+    id: getIdentifier(input, ['id', 'businessUnitId']),
+    name: getString(input, ['name', 'displayName']) ?? '',
+    active: getBoolean(input, ['active', 'isActive']) ?? false,
+  }
+}
+
+export function toEmployeeSummary(input: unknown): UnknownRecord {
+  const roles = getArrayValue(input, ['roles'])
+
+  return {
+    id: getIdentifier(input, ['id', 'employeeId']),
+    name: getDisplayName(input),
+    email: getString(input, ['email', 'emailAddress', 'workEmail']) ?? '',
+    phoneNumber: getString(input, ['phoneNumber', 'phone', 'mobilePhone']) ?? '',
+    role:
+      getString(input, ['role.name', 'roleName', 'title', 'position']) ??
+      getString(roles[0], ['name', 'roleName', 'title']) ??
+      '',
+    active: getBoolean(input, ['active', 'isActive']) ?? false,
+  }
+}
+
 export function toMembershipSummary(input: unknown): UnknownRecord {
   // ST API: from/to (not start/end), membershipTypeId (ID), customerId (ID)
   const statusRaw = getPathValue(input, 'status')
@@ -178,6 +223,32 @@ export function toEstimateDetail(input: unknown): UnknownRecord {
     soldOn: getString(input, ['soldOn', 'soldAt']) ?? '',
     dismissedOn: getString(input, ['dismissedOn', 'dismissedAt']) ?? '',
     createdBy: getString(input, ['createdBy.name', 'createdByName']) ?? '',
+  }
+}
+
+export function toJobTypeSummary(input: unknown): UnknownRecord {
+  return {
+    id: getIdentifier(input, ['id', 'jobTypeId']),
+    name: getString(input, ['name', 'displayName']) ?? '',
+    duration: getNumber(input, ['duration', 'durationMinutes', 'estimatedDuration']) ?? 0,
+    active: getBoolean(input, ['active', 'isActive']) ?? false,
+  }
+}
+
+export function toAppointmentSummary(input: unknown): UnknownRecord {
+  const statusRaw = getPathValue(input, 'status')
+  const status = typeof statusRaw === 'string' ? statusRaw : (getString(statusRaw, ['value', 'name']) ?? '')
+
+  return {
+    id: getIdentifier(input, ['id', 'appointmentId']),
+    jobId: getIdentifier(input, ['jobId', 'job.id']),
+    appointmentNumber: getString(input, ['appointmentNumber', 'number']) ?? '',
+    start: getString(input, ['start', 'startsOn', 'scheduledStart']) ?? '',
+    end: getString(input, ['end', 'endsOn', 'scheduledEnd']) ?? '',
+    arrivalWindowStart: getString(input, ['arrivalWindowStart']) ?? '',
+    arrivalWindowEnd: getString(input, ['arrivalWindowEnd']) ?? '',
+    status,
+    isConfirmed: getBoolean(input, ['isConfirmed', 'confirmed']) ?? false,
   }
 }
 
@@ -277,6 +348,89 @@ export function toCapacitySummary(input: unknown): UnknownRecord {
   }
 }
 
+export function toCallSummary(input: unknown): UnknownRecord {
+  const statusRaw = getPathValue(input, 'status')
+  const status = typeof statusRaw === 'string' ? statusRaw : (getString(statusRaw, ['value', 'name']) ?? '')
+
+  return {
+    id: getIdentifier(input, ['id', 'callId']),
+    status,
+    duration: getNumber(input, ['duration', 'durationSeconds', 'talkTime']) ?? 0,
+    createdOn: getString(input, ['createdOn', 'createdAt', 'startTime']) ?? '',
+    answeredBy:
+      getString(input, ['answeredBy.name', 'answeredByName', 'agent.name', 'employee.name']) ?? '',
+    customer:
+      getString(input, ['customer.name', 'customerName', 'caller.name', 'callerName', 'name']) ?? '',
+    reason: getString(input, ['callReason.name', 'reason.name', 'reason']) ?? '',
+  }
+}
+
+export function toPayrollSummary(input: unknown): UnknownRecord {
+  return {
+    id: getIdentifier(input, ['id', 'payrollId']),
+    employee:
+      getString(input, ['employee.name', 'employeeName']) ??
+      String(getIdentifier(input, ['employeeId', 'employee.id'])),
+    technician:
+      getString(input, ['technician.name', 'technicianName']) ??
+      String(getIdentifier(input, ['technicianId', 'technician.id'])),
+    periodStart: getString(input, ['periodStart', 'startsOn', 'startDate']) ?? '',
+    periodEnd: getString(input, ['periodEnd', 'endsOn', 'endDate']) ?? '',
+    total: getNumber(input, ['total', 'grossPay', 'amount']) ?? 0,
+  }
+}
+
+export function toTimesheetSummary(input: unknown): UnknownRecord {
+  return {
+    id: getIdentifier(input, ['id', 'timesheetId']),
+    jobId: getIdentifier(input, ['jobId', 'job.id']),
+    technicianId: getIdentifier(input, ['technicianId', 'technician.id']),
+    startTime: getString(input, ['startTime', 'startsOn', 'start']) ?? '',
+    endTime: getString(input, ['endTime', 'endsOn', 'end']) ?? '',
+    duration: getNumber(input, ['duration', 'durationMinutes', 'totalMinutes']) ?? 0,
+    activityCode:
+      getString(input, ['activityCode.name', 'activityCode.code', 'activityCodeName', 'activityCode']) ??
+      '',
+  }
+}
+
+export function toPurchaseOrderSummary(input: unknown): UnknownRecord {
+  const statusRaw = getPathValue(input, 'status')
+  const status = typeof statusRaw === 'string' ? statusRaw : (getString(statusRaw, ['value', 'name']) ?? '')
+
+  return {
+    id: getIdentifier(input, ['id', 'purchaseOrderId']),
+    number: getString(input, ['number', 'purchaseOrderNumber']) ?? '',
+    vendor:
+      getString(input, ['vendor.name', 'vendorName']) ??
+      String(getIdentifier(input, ['vendorId', 'vendor.id'])),
+    status,
+    date: getString(input, ['date', 'createdOn', 'orderedOn']) ?? '',
+    total: getNumber(input, ['total', 'amount', 'totalAmount']) ?? 0,
+  }
+}
+
+export function toVendorSummary(input: unknown): UnknownRecord {
+  return {
+    id: getIdentifier(input, ['id', 'vendorId']),
+    name: getString(input, ['name', 'displayName']) ?? '',
+    active: getBoolean(input, ['active', 'isActive']) ?? false,
+  }
+}
+
+export function toActivitySummary(input: unknown): UnknownRecord {
+  return {
+    id: getIdentifier(input, ['id', 'activityId']),
+    type: getString(input, ['activityType.name', 'activityTypeName', 'type', 'name']) ?? '',
+    technician:
+      getString(input, ['technician.name', 'technicianName']) ??
+      String(getIdentifier(input, ['technicianId', 'technician.id'])),
+    date: getString(input, ['date', 'activityDate', 'startTime', 'startsOn']) ?? '',
+    duration: getNumber(input, ['duration', 'durationMinutes', 'totalMinutes']) ?? 0,
+    jobId: getIdentifier(input, ['jobId', 'job.id']),
+  }
+}
+
 export function toReportCategoryRows(input: unknown): UnknownRecord[] {
   const records = Array.isArray(input)
     ? input
@@ -298,6 +452,18 @@ function getDisplayName(input: unknown): string {
 
 function getIdentifier(input: unknown, paths: string[]): number | string {
   return getNumber(input, paths) ?? getString(input, paths) ?? ''
+}
+
+function getArrayValue(input: unknown, paths: string[]): unknown[] {
+  for (const path of paths) {
+    const value = getPathValue(input, path)
+
+    if (Array.isArray(value)) {
+      return value
+    }
+  }
+
+  return []
 }
 
 function toReportRows(input: unknown): UnknownRecord[] {

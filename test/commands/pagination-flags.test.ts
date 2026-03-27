@@ -1,11 +1,14 @@
 import {afterEach, describe, expect, it, vi} from 'vitest'
 
+import AppointmentsList from '../../src/commands/appointments/list.js'
 import BookingsList from '../../src/commands/bookings/list.js'
 import CustomersList from '../../src/commands/customers/list.js'
+import EmployeesList from '../../src/commands/employees/list.js'
 import EstimatesList from '../../src/commands/estimates/list.js'
 import InvoicesList from '../../src/commands/invoices/list.js'
 import JobsList from '../../src/commands/jobs/list.js'
 import LeadsList from '../../src/commands/leads/list.js'
+import LocationsList from '../../src/commands/locations/list.js'
 import MembershipsList from '../../src/commands/memberships/list.js'
 import MembershipsTypes from '../../src/commands/memberships/types.js'
 import PricebookEquipment from '../../src/commands/pricebook/equipment.js'
@@ -27,6 +30,13 @@ type CommandCase = {
 const CASES: CommandCase[] = [
   {
     argv: ['--page', '2', '--limit', '10'],
+    command: AppointmentsList,
+    label: 'appointments list',
+    params: {from: undefined, jobId: undefined, page: 2, pageSize: 10, status: undefined, to: undefined},
+    path: '/appointments',
+  },
+  {
+    argv: ['--page', '2', '--limit', '10'],
     command: BookingsList,
     label: 'bookings list',
     params: {page: 2, pageSize: 10, status: undefined},
@@ -38,6 +48,13 @@ const CASES: CommandCase[] = [
     label: 'customers list',
     params: {active: undefined, page: 2, pageSize: 10, search: undefined},
     path: '/customers',
+  },
+  {
+    argv: ['--page', '2', '--limit', '10'],
+    command: EmployeesList,
+    label: 'employees list',
+    params: {active: undefined, page: 2, pageSize: 10},
+    path: '/employees',
   },
   {
     argv: ['--page', '2', '--limit', '10'],
@@ -66,6 +83,20 @@ const CASES: CommandCase[] = [
     label: 'leads list',
     params: {page: 2, pageSize: 10, status: undefined},
     path: '/leads',
+  },
+  {
+    argv: ['--page', '2', '--limit', '10'],
+    command: LocationsList,
+    label: 'locations list',
+    params: {
+      active: undefined,
+      customerId: undefined,
+      from: undefined,
+      page: 2,
+      pageSize: 10,
+      to: undefined,
+    },
+    path: '/locations',
   },
   {
     argv: ['--page', '2', '--limit', '10'],

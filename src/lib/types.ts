@@ -16,6 +16,7 @@ export type ServiceTitanModule =
   | 'inventory'
   | 'reporting'
   | 'settings'
+  | 'timesheets'
   | 'task-management'
   | 'forms'
 

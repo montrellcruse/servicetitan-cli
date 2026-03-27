@@ -27,9 +27,13 @@ describe('ServiceTitanClient path resolution', () => {
   })
 
   it.each([
+    ['/activities', 'timesheets'],
+    ['/activity-codes', 'payroll'],
+    ['/activity-types', 'timesheets'],
     ['/customers', 'crm'],
     ['/contacts', 'crm'],
     ['/jobs', 'jpm'],
+    ['/jobs/timesheets', 'payroll'],
     ['/appointments', 'jpm'],
     ['/appointment-assignments', 'dispatch'],
     ['/invoices', 'accounting'],
@@ -41,9 +45,17 @@ describe('ServiceTitanClient path resolution', () => {
     ['/calls', 'telecom'],
     ['/purchase-orders', 'inventory'],
     ['/report-categories', 'reporting'],
+    ['/trucks', 'inventory'],
     ['/business-units', 'settings'],
   ])('maps %s to %s', (path, moduleName) => {
     expect(getRouteModule(path)).toBe(moduleName)
+  })
+
+  it('does not double-prefix fully qualified timesheets paths', () => {
+    const client = createClient()
+    expect(client.addApiPrefix('/timesheets/v2/tenant/12345/activities')).toBe(
+      '/timesheets/v2/tenant/12345/activities',
+    )
   })
 })
 

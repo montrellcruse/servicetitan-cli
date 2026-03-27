@@ -25,6 +25,9 @@ export const ENVIRONMENTS = {
 
 export const ROUTE_TABLE: Record<string, ServiceTitanModule> = {
   '/adjustments': 'inventory',
+  '/activities': 'timesheets',
+  '/activity-codes': 'payroll',
+  '/activity-types': 'timesheets',
   '/ap-credits': 'accounting',
   '/ap-payments': 'accounting',
   '/appointment-assignments': 'dispatch',
@@ -58,6 +61,7 @@ export const ROUTE_TABLE: Record<string, ServiceTitanModule> = {
   '/invoices': 'accounting',
   '/job-cancel-reasons': 'jpm',
   '/job-hold-reasons': 'jpm',
+  '/jobs/timesheets': 'payroll',
   '/job-types': 'jpm',
   '/jobs': 'jpm',
   '/journal-entries': 'accounting',
@@ -97,6 +101,7 @@ export const ROUTE_TABLE: Record<string, ServiceTitanModule> = {
   '/technicians': 'settings',
   '/timesheets': 'payroll',
   '/transfers': 'inventory',
+  '/trucks': 'inventory',
   '/user-roles': 'settings',
   '/vendors': 'inventory',
   '/warehouses': 'inventory',
@@ -106,7 +111,7 @@ export const ROUTE_TABLE: Record<string, ServiceTitanModule> = {
 const TOKEN_TTL_BUFFER_MS = 60_000
 const DEFAULT_TIMEOUT_MS = 30_000
 const MODULE_PREFIX_PATTERN =
-  /^\/(?:crm|jpm|dispatch|accounting|sales|pricebook|payroll|memberships|marketing|telecom|inventory|reporting|settings|task-management|forms)\/v\d+\//
+  /^\/(?:crm|jpm|dispatch|accounting|sales|pricebook|payroll|memberships|marketing|telecom|inventory|reporting|settings|timesheets|task-management|forms)\/v\d+\//
 
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
   __stRetried401?: boolean

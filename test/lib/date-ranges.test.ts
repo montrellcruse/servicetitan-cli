@@ -1,6 +1,10 @@
 import {describe, expect, it} from 'vitest'
 
-import {resolveDateRange, resolvePeriodDateRange} from '../../src/lib/date-ranges.js'
+import {
+  resolveDateRange,
+  resolveOptionalDateRange,
+  resolvePeriodDateRange,
+} from '../../src/lib/date-ranges.js'
 
 describe('date ranges', () => {
   it('calculates a day range', () => {
@@ -49,5 +53,26 @@ describe('date ranges', () => {
       from: '2026-03-01',
       to: '2026-03-26',
     })
+  })
+
+  it('validates optional from/to date filters', () => {
+    expect(
+      resolveOptionalDateRange({
+        from: '2026-03-01',
+        to: '2026-03-26',
+      }),
+    ).toEqual({
+      from: '2026-03-01',
+      to: '2026-03-26',
+    })
+  })
+
+  it('rejects optional date filters where from is after to', () => {
+    expect(() =>
+      resolveOptionalDateRange({
+        from: '2026-03-27',
+        to: '2026-03-26',
+      }),
+    ).toThrow('From date must be on or before the to date.')
   })
 })

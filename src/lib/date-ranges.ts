@@ -83,6 +83,20 @@ export function resolveDateRange(options: {
   return {from, to}
 }
 
+export function resolveOptionalDateRange(options: {
+  from?: string
+  to?: string
+} = {}): Partial<DateRange> {
+  const from = options.from ? assertDateString(options.from, 'From date') : undefined
+  const to = options.to ? assertDateString(options.to, 'To date') : undefined
+
+  if (from && to && from > to) {
+    throw new Error('From date must be on or before the to date.')
+  }
+
+  return {from, to}
+}
+
 export function assertDateString(value: string, label = 'Date'): string {
   parseDate(value, label)
   return value
