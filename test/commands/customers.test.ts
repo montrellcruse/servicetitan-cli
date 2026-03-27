@@ -11,7 +11,7 @@ describe('customers commands', () => {
 
   it('renders a customer table for customers list', async () => {
     const getSpy = vi.fn().mockResolvedValue({
-      data: [createCustomer()],
+      data: [createListCustomer()],
       hasMore: false,
     })
     const {output} = createTestContext({
@@ -30,12 +30,11 @@ describe('customers commands', () => {
     })
     const rendered = stripAnsi(output())
     expect(rendered).toContain('Skyline Bakery')
-    expect(rendered).toContain('602-555-0142')
   })
 
   it('renders JSON output for customers list', async () => {
     const getSpy = vi.fn().mockResolvedValue({
-      data: [createCustomer()],
+      data: [createListCustomer()],
       hasMore: false,
     })
     const {output} = createTestContext({
@@ -50,10 +49,10 @@ describe('customers commands', () => {
       {
         active: true,
         created: '2026-03-12T15:30:00Z',
-        email: 'ops@skylinebakery.com',
+        email: '',
         id: 403219,
         name: 'Skyline Bakery',
-        phone: '602-555-0142',
+        phone: '',
       },
     ])
   })
@@ -91,7 +90,7 @@ describe('customers commands', () => {
   })
 
   it('fetches and renders a single customer', async () => {
-    const getSpy = vi.fn().mockResolvedValue(createCustomer())
+    const getSpy = vi.fn().mockResolvedValue(createDetailCustomer())
     const {output} = createTestContext({
       client: {
         get: getSpy,
@@ -103,12 +102,13 @@ describe('customers commands', () => {
     expect(getSpy).toHaveBeenCalledWith('/customers/403219')
     const rendered = stripAnsi(output())
     expect(rendered).toContain('Skyline Bakery')
+    expect(rendered).toContain('602-555-0142')
     expect(rendered).toContain('Phoenix')
     expect(rendered).toContain('85004')
   })
 })
 
-function createCustomer() {
+function createListCustomer() {
   return {
     active: true,
     address: {
@@ -118,9 +118,25 @@ function createCustomer() {
       zip: '85004',
     },
     createdOn: '2026-03-12T15:30:00Z',
-    email: 'ops@skylinebakery.com',
     id: 403219,
     name: 'Skyline Bakery',
-    phone: '602-555-0142',
+  }
+}
+
+function createDetailCustomer() {
+  return {
+    ...createListCustomer(),
+    contacts: [
+      {
+        isDefault: true,
+        type: 'Phone',
+        value: '602-555-0142',
+      },
+      {
+        isDefault: true,
+        type: 'Email',
+        value: 'ops@skylinebakery.com',
+      },
+    ],
   }
 }

@@ -2,7 +2,8 @@ import {getBoolean, getNumber, getPathValue, getString} from './data.js'
 import type {UnknownRecord} from './types.js'
 
 export function toCustomerSummary(input: unknown): UnknownRecord {
-  // ST API: contacts[] array with type 'MobilePhone', 'Phone', 'Email', isDefault: true
+  // ST customers list responses usually omit contacts[]; blank phone/email is expected there.
+  // `st customers get <id>` uses the detail payload, which does include contacts[].
   const contacts = Array.isArray(getPathValue(input, 'contacts')) ? (getPathValue(input, 'contacts') as UnknownRecord[]) : []
   const phone =
     (contacts.find((c) => (getString(c, ['type']) === 'MobilePhone' || getString(c, ['type']) === 'Phone') && getBoolean(c, ['isDefault']))?.value as string | undefined) ??
