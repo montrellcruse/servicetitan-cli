@@ -5,6 +5,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 > A first-party quality CLI for the ServiceTitan API.
+>
+> Built by [**Rowvyn**](https://rowvyn.com) — [See the case study →](https://rowvyn.com/case-studies/servicetitan-cli)
 
 ServiceTitan CLI brings customer, job, invoice, dispatch, reporting, and operational intelligence workflows into a single `st` binary. It is built for developers, operators, and AI agents that need clean output, secure auth, fast scripting, and a reliable escape hatch when the named commands do not cover a niche endpoint yet.
 
