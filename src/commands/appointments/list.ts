@@ -23,6 +23,12 @@ export default class AppointmentsList extends BaseCommand {
     to: Flags.string({
       description: 'Created-before date, inclusive (YYYY-MM-DD)',
     }),
+    'starts-from': Flags.string({
+      description: 'Appointment starts on or after this date (YYYY-MM-DD)',
+    }),
+    'starts-to': Flags.string({
+      description: 'Appointment starts before this date, inclusive (YYYY-MM-DD)',
+    }),
     page: Flags.integer({
       description: 'Page number to fetch (1-based)',
     }),
@@ -40,6 +46,12 @@ export default class AppointmentsList extends BaseCommand {
     const createdBefore = flags.to
       ? toSTDateTimeExclusiveEnd(assertDateString(flags.to, 'To date'))
       : undefined
+    const startsOnOrAfter = flags['starts-from']
+      ? toSTDateTime(assertDateString(flags['starts-from'], 'Starts-from date'))
+      : undefined
+    const startsBefore = flags['starts-to']
+      ? toSTDateTimeExclusiveEnd(assertDateString(flags['starts-to'], 'Starts-to date'))
+      : undefined
     const limit = flags.limit ?? 50
     const appointments = await paginate<UnknownRecord>(
       this.requireClient(),
@@ -49,6 +61,8 @@ export default class AppointmentsList extends BaseCommand {
         createdOnOrAfter,
         jobId: flags.job,
         page: flags.page,
+        startsBefore,
+        startsOnOrAfter,
         status: flags.status,
       },
       {
