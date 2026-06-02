@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [0.3.7] - 2026-06-02
+
+### Added
+- `appointments list --starts-from` and `--starts-to` filters for scheduled appointment start dates.
+- Regression coverage for appointment start-date filter API params.
+
+### Changed
+- Homebrew formula and package metadata aligned to the published npm release.
+
 ## [0.3.4] - 2026-03-27
 
 ### Fixed
