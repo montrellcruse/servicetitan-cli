@@ -34,7 +34,16 @@ const CASES: CommandCase[] = [
     argv: ['--page', '2', '--limit', '10'],
     command: AppointmentsList,
     label: 'appointments list',
-    params: {from: undefined, jobId: undefined, page: 2, pageSize: 10, status: undefined, to: undefined},
+    params: {
+      createdBefore: undefined,
+      createdOnOrAfter: undefined,
+      jobId: undefined,
+      page: 2,
+      pageSize: 10,
+      startsBefore: undefined,
+      startsOnOrAfter: undefined,
+      status: undefined,
+    },
     path: '/appointments',
   },
   {
@@ -178,5 +187,50 @@ describe('paginated list commands', () => {
 
     expect(getSpy).toHaveBeenCalledWith(path, params)
     expect(stripAnsi(output())).toContain('No results found.')
+  })
+
+  it('passes appointment start-date filters through to the ServiceTitan API params', async () => {
+    const getSpy = vi.fn().mockResolvedValue({
+      data: [],
+      hasMore: false,
+    })
+    createTestContext({
+      client: {
+        get: getSpy,
+      },
+    })
+
+    await AppointmentsList.run(
+      [
+        '--from',
+        '2026-05-01',
+        '--to',
+        '2026-05-31',
+        '--starts-from',
+        '2026-06-01',
+        '--starts-to',
+        '2026-06-02',
+        '--job',
+        '123',
+        '--status',
+        'Confirmed',
+        '--page',
+        '3',
+        '--limit',
+        '25',
+      ],
+      process.cwd(),
+    )
+
+    expect(getSpy).toHaveBeenCalledWith('/appointments', {
+      createdBefore: '2026-06-01T00:00:00Z',
+      createdOnOrAfter: '2026-05-01T00:00:00Z',
+      jobId: 123,
+      page: 3,
+      pageSize: 25,
+      startsBefore: '2026-06-03T00:00:00Z',
+      startsOnOrAfter: '2026-06-01T00:00:00Z',
+      status: 'Confirmed',
+    })
   })
 })
