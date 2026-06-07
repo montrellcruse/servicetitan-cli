@@ -1,4 +1,5 @@
 import {vi} from 'vitest'
+import type {MockInstance} from 'vitest'
 
 import {BaseCommand} from '../src/lib/base-command.js'
 import {ServiceTitanClient} from '../src/lib/client.js'
@@ -20,14 +21,21 @@ interface CreateTestContextOptions {
   profileName?: string
 }
 
+type InitializeRuntimeMock = (flags: {compact?: boolean; output?: string}) => Promise<{
+  client: ServiceTitanClient
+  config: ConfigFile
+  profile?: ProfileConfig
+  profileName?: string
+}>
+
 export function createTestContext(
   options: CreateTestContextOptions = {},
 ): {
   client: ServiceTitanClient
   output: () => string
   mocks: {
-    initializeRuntime: ReturnType<typeof vi.spyOn>
-    stdout: ReturnType<typeof vi.spyOn>
+    initializeRuntime: MockInstance<InitializeRuntimeMock>
+    stdout: MockInstance<typeof process.stdout.write>
   }
 } {
   const config = options.config ?? CONFIG_STUB
@@ -47,7 +55,10 @@ export function createTestContext(
 
   Object.assign(client, options.client ?? {})
 
-  const initializeRuntime = vi.spyOn(BaseCommand.prototype as never, 'initializeRuntime').mockImplementation(
+  const runtimeTarget = BaseCommand.prototype as unknown as {
+    initializeRuntime: InitializeRuntimeMock
+  }
+  const initializeRuntime = vi.spyOn(runtimeTarget, 'initializeRuntime').mockImplementation(
     function mockInitializeRuntime(this: BaseCommand, flags: {compact?: boolean; output?: string}) {
       this.outputFormat =
         flags.output === 'json' || flags.output === 'csv' || flags.output === 'table'

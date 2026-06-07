@@ -28,8 +28,8 @@ describe('ServiceTitanClient rate limiting', () => {
 
   type PrivateClient = {
     http: {
-      get: ReturnType<typeof vi.fn>
-      request: ReturnType<typeof vi.fn>
+      get: <T = unknown>(url: string, config?: unknown) => Promise<{data: T}>
+      request: (config?: unknown) => Promise<{data: unknown}>
     }
     fetchToken: () => Promise<string>
     handleResponseError: (err: unknown) => Promise<unknown>
