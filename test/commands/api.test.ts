@@ -1,4 +1,5 @@
 import {afterEach, describe, expect, it, vi} from 'vitest'
+import type {MockInstance} from 'vitest'
 
 import ApiGet from '../../src/commands/api/get.js'
 import ApiDelete from '../../src/commands/api/delete.js'
@@ -107,11 +108,11 @@ describe('api escape hatch', () => {
 })
 
 function createApiContext(): {
-  deleteRawSpy: ReturnType<typeof vi.spyOn>
-  getRawSpy: ReturnType<typeof vi.spyOn>
+  deleteRawSpy: MockInstance<ServiceTitanClient['deleteRaw']>
+  getRawSpy: MockInstance<ServiceTitanClient['getRaw']>
   output: () => string
-  postRawSpy: ReturnType<typeof vi.spyOn>
-  putRawSpy: ReturnType<typeof vi.spyOn>
+  postRawSpy: MockInstance<ServiceTitanClient['postRaw']>
+  putRawSpy: MockInstance<ServiceTitanClient['putRaw']>
 } {
   const {client: apiClient, output} = createTestContext()
   const getRawSpy = vi.spyOn(apiClient, 'getRaw')

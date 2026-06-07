@@ -1,4 +1,5 @@
 import {afterEach, describe, expect, it, vi} from 'vitest'
+import type {MockInstance} from 'vitest'
 
 import BookingsAccept from '../../src/commands/bookings/accept.js'
 import BookingsDismiss from '../../src/commands/bookings/dismiss.js'
@@ -17,6 +18,30 @@ import LocationsCreate from '../../src/commands/locations/create.js'
 import LocationsUpdate from '../../src/commands/locations/update.js'
 import type {ServiceTitanClient} from '../../src/lib/client.js'
 import {createTestContext, stripAnsi} from '../helpers.js'
+
+type DryRunCommand =
+  | typeof BookingsAccept
+  | typeof BookingsDismiss
+  | typeof CustomersCreate
+  | typeof CustomersUpdate
+  | typeof DispatchAssign
+  | typeof EstimatesSell
+  | typeof EstimatesUnsell
+  | typeof JobsBook
+  | typeof JobsCancel
+  | typeof JobsComplete
+  | typeof JobsUpdate
+  | typeof LeadsConvert
+  | typeof LeadsDismiss
+  | typeof LocationsCreate
+  | typeof LocationsUpdate
+
+interface DryRunCase {
+  argv: string[]
+  command: DryRunCommand
+  expected: string[]
+  label: string
+}
 
 describe('write ops dry run', () => {
   afterEach(() => {
@@ -96,7 +121,7 @@ describe('write ops dry run', () => {
     expect(patchSpy).not.toHaveBeenCalled()
   })
 
-  it.each([
+  const dryRunCases: DryRunCase[] = [
     {
       argv: ['42', '--phone', '602-555-0101', '--dry-run'],
       command: CustomersUpdate,
@@ -174,7 +199,9 @@ describe('write ops dry run', () => {
       expected: ['[DRY RUN] POST /sales/v2/tenant/12345/estimates/730118/unsell', '{}'],
       label: 'estimates unsell',
     },
-  ])('prints the expected dry-run output for $label', async ({command, argv, expected}) => {
+  ]
+
+  it.each(dryRunCases)('prints the expected dry-run output for $label', async ({command, argv, expected}) => {
     const {client, output, patchSpy, postSpy} = createDryRunContext()
 
     await runCommand(command, argv, client)
@@ -191,8 +218,8 @@ describe('write ops dry run', () => {
 function createDryRunContext(): {
   client: ServiceTitanClient
   output: () => string
-  patchSpy: ReturnType<typeof vi.spyOn>
-  postSpy: ReturnType<typeof vi.spyOn>
+  patchSpy: MockInstance<ServiceTitanClient['patch']>
+  postSpy: MockInstance<ServiceTitanClient['post']>
 } {
   const {client, output} = createTestContext()
   const postSpy = vi.spyOn(client, 'post')
@@ -207,22 +234,7 @@ function createDryRunContext(): {
 }
 
 async function runCommand(
-  command:
-    | typeof BookingsAccept
-    | typeof BookingsDismiss
-    | typeof CustomersCreate
-    | typeof CustomersUpdate
-    | typeof DispatchAssign
-    | typeof EstimatesSell
-    | typeof EstimatesUnsell
-    | typeof JobsBook
-    | typeof JobsCancel
-    | typeof JobsComplete
-    | typeof JobsUpdate
-    | typeof LeadsConvert
-    | typeof LeadsDismiss
-    | typeof LocationsCreate
-    | typeof LocationsUpdate,
+  command: DryRunCommand,
   argv: string[],
   client: ServiceTitanClient,
 ): Promise<void> {
