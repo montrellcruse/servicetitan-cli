@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [0.3.8] - 2026-06-07
+
+### Fixed
+- Updated the CLI dependency set to clear Dependabot audit findings, including the patched Axios and Vitest stacks.
+- Tightened Vitest 4 mock typing in tests so lint, typecheck, and CI stay clean on Node 20 and 22.
+
 ## [0.3.7] - 2026-06-02
 
 ### Added
@@ -165,7 +171,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Keytar-based credential storage in OS keychain
 - Integration and production environment support
 
-[Unreleased]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.2.3...HEAD
+[Unreleased]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.3.8...HEAD
+[0.3.8]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.3.7...v0.3.8
+[0.3.7]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.3.4...v0.3.7
 [0.2.3]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.2.0...v0.2.1
