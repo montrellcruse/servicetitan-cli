@@ -14,6 +14,7 @@ export default class JobsList extends BaseCommand {
     '<%= config.bin %> jobs list --status Scheduled,InProgress --date 2026-03-26',
     '<%= config.bin %> jobs list --from 2026-03-01 --to 2026-03-31',
     '<%= config.bin %> jobs list --completed-from 2026-03-01 --completed-to 2026-03-31',
+    '<%= config.bin %> jobs list --equipment-ids 1001,1002',
     '<%= config.bin %> jobs list --fields id,status,customer,total --output csv',
   ]
 
@@ -36,6 +37,9 @@ export default class JobsList extends BaseCommand {
     }),
     'completed-to': Flags.string({
       description: 'Completed-before date, inclusive (YYYY-MM-DD)',
+    }),
+    'equipment-ids': Flags.string({
+      description: 'Comma-separated installed equipment IDs; returns jobs with at least one attached equipment item',
     }),
     page: Flags.integer({
       description: 'Page number to fetch (1-based)',
@@ -95,6 +99,7 @@ export default class JobsList extends BaseCommand {
         completedOnOrAfter,
         createdBefore,
         createdOnOrAfter,
+        equipmentIds: flags['equipment-ids'],
         page: flags.page,
         // When filtering by completion date without an explicit status, default to
         // Completed — canceled jobs can have a completedOn date set and would otherwise
@@ -118,7 +123,7 @@ export default class JobsList extends BaseCommand {
     )
 
     await this.renderRecords(jobs.map(job => toJobSummary(job)), {
-      defaultFields: ['id', 'status', 'customer', 'type', 'scheduled', 'total'],
+      defaultFields: ['id', 'status', 'customer', 'type', 'scheduled', 'equipmentIds', 'total'],
       fields: this.parseFields(flags.fields),
     })
   }

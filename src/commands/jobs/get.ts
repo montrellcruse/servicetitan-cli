@@ -36,7 +36,20 @@ export default class JobsGet extends BaseCommand {
     await this.renderRecord(record, {
       defaultFields: flags.full
         ? undefined
-        : ['id', 'status', 'customer', 'type', 'scheduled', 'total', 'summary', 'businessUnit', 'technician', 'created'],
+        : [
+            'id',
+            'status',
+            'customer',
+            'type',
+            'scheduled',
+            'equipmentIds',
+            'total',
+            'summary',
+            'summaryOfWork',
+            'businessUnit',
+            'technician',
+            'created',
+          ],
     })
   }
 }

@@ -13,6 +13,9 @@ export default class JobTypesList extends BaseCommand {
       allowNo: true,
       description: 'Filter job types by active status',
     }),
+    fields: Flags.string({
+      description: 'Comma-separated fields to include',
+    }),
   }
 
   public async run(): Promise<void> {
@@ -24,7 +27,8 @@ export default class JobTypesList extends BaseCommand {
     const jobTypes = extractResponseRecords(response)
 
     await this.renderRecords(jobTypes.map(jobType => toJobTypeSummary(jobType)), {
-      defaultFields: ['id', 'name', 'duration', 'active'],
+      defaultFields: ['id', 'name', 'duration', 'active', 'defaultEstimateSoldAction', 'customFieldTypeIds'],
+      fields: this.parseFields(flags.fields),
     })
   }
 }

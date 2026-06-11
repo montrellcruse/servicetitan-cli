@@ -68,6 +68,7 @@ export function toJobSummary(input: unknown): UnknownRecord {
     customer,
     type,
     scheduled: getString(input, ['scheduledDate', 'completedOn', 'createdOn']) ?? '',
+    equipmentIds: getArrayValue(input, ['equipmentIds']),
     total: parseCurrencyValue(
       getPathValue(input, 'total') ?? getPathValue(input, 'totalAmount') ?? getPathValue(input, 'invoice.total'),
     ),
@@ -81,6 +82,7 @@ export function toJobDetail(input: unknown): UnknownRecord {
   return {
     ...toJobSummary(input),
     summary: getString(input, ['summary', 'description']) ?? '',
+    summaryOfWork: getString(input, ['summaryOfWork']) ?? '',
     businessUnit,
     technician: getString(input, ['technician.name', 'assignedTechnician.name', 'technicianName']) ?? '',
     created: getString(input, ['createdOn', 'createdAt']) ?? '',
@@ -236,12 +238,70 @@ export function toEstimateDetail(input: unknown): UnknownRecord {
   }
 }
 
+export function toEstimateTemplateSummary(input: unknown): UnknownRecord {
+  return {
+    id: getIdentifier(input, ['id']),
+    name: getString(input, ['name']) ?? '',
+    internalName: getString(input, ['internalName']) ?? '',
+    mode: getString(input, ['mode']) ?? '',
+    active: getBoolean(input, ['active']) ?? false,
+    businessUnitId: getIdentifier(input, ['businessUnitId']),
+    totalPrice: getNumber(input, ['totalPrice']) ?? 0,
+    modified: getString(input, ['modifiedOn']) ?? '',
+  }
+}
+
+export function toEstimateTemplateDetail(input: unknown): UnknownRecord {
+  return {
+    ...toEstimateTemplateSummary(input),
+    summary: getString(input, ['summary']) ?? '',
+    totalCost: getNumber(input, ['totalCost']) ?? 0,
+    created: getString(input, ['createdOn']) ?? '',
+    items: getArrayValue(input, ['items']),
+  }
+}
+
+export function toProposalTemplateSummary(input: unknown): UnknownRecord {
+  return {
+    id: getIdentifier(input, ['id']),
+    name: getString(input, ['name']) ?? '',
+    status: getString(input, ['status']) ?? '',
+    active: getBoolean(input, ['active']) ?? false,
+    proposalTypeId: getIdentifier(input, ['proposalTypeId']),
+    proposalTypeName: getString(input, ['proposalTypeName']) ?? '',
+    modified: getString(input, ['modifiedOn']) ?? '',
+  }
+}
+
+export function toProposalTemplateDetail(input: unknown): UnknownRecord {
+  return {
+    ...toProposalTemplateSummary(input),
+    description: getString(input, ['description']) ?? '',
+    businessUnitIds: getArrayValue(input, ['businessUnitIds']),
+    estimateAssignments: getArrayValue(input, ['estimateAssignments']),
+    created: getString(input, ['createdOn']) ?? '',
+  }
+}
+
+export function toProposalTypeSummary(input: unknown): UnknownRecord {
+  return {
+    id: getIdentifier(input, ['id']),
+    name: getString(input, ['name']) ?? '',
+    type: getString(input, ['type']) ?? '',
+    active: getBoolean(input, ['active']) ?? false,
+    isDefault: getBoolean(input, ['isDefault']) ?? false,
+    isSystemDefault: getBoolean(input, ['isSystemDefault']) ?? false,
+  }
+}
+
 export function toJobTypeSummary(input: unknown): UnknownRecord {
   return {
     id: getIdentifier(input, ['id', 'jobTypeId']),
     name: getString(input, ['name', 'displayName']) ?? '',
     duration: getNumber(input, ['duration', 'durationMinutes', 'estimatedDuration']) ?? 0,
     active: getBoolean(input, ['active', 'isActive']) ?? false,
+    defaultEstimateSoldAction: getString(input, ['defaultEstimateSoldAction']) ?? '',
+    customFieldTypeIds: getArrayValue(input, ['customFieldTypeIds']),
   }
 }
 
@@ -259,6 +319,7 @@ export function toAppointmentSummary(input: unknown): UnknownRecord {
     arrivalWindowEnd: getString(input, ['arrivalWindowEnd']) ?? '',
     status,
     isConfirmed: getBoolean(input, ['isConfirmed', 'confirmed']) ?? false,
+    appointmentSummaries: getArrayValue(input, ['appointmentSummaries']),
   }
 }
 

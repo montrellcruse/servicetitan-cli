@@ -52,6 +52,7 @@ export const ROUTE_TABLE: Record<string, ServiceTitanModule> = {
   '/employees': 'settings',
   '/equipment': 'pricebook',
   '/estimates': 'sales',
+  '/estimate-templates': 'sales',
   '/forms': 'forms',
   '/gl-accounts': 'accounting',
   '/gross-pay-items': 'payroll',
@@ -78,6 +79,8 @@ export const ROUTE_TABLE: Record<string, ServiceTitanModule> = {
   '/performance': 'settings',
   '/projects': 'jpm',
   '/project-types': 'jpm',
+  '/proposal-templates': 'sales',
+  '/proposal-types': 'sales',
   '/purchase-order-markups': 'inventory',
   '/purchase-orders': 'inventory',
   '/purchase-order-types': 'inventory',
@@ -262,8 +265,26 @@ export class ServiceTitanClient {
     return response.data
   }
 
+  public async deleteWithBody<T>(
+    path: string,
+    body?: unknown,
+    params?: Record<string, unknown>,
+  ): Promise<T> {
+    const response = await this.http.delete<T>(this.resolvePath(path), {data: body, params})
+    return response.data
+  }
+
   public async deleteRaw<T>(path: string, params?: Record<string, unknown>): Promise<T> {
     const response = await this.http.delete<T>(this.resolveRawPath(path), {params})
+    return response.data
+  }
+
+  public async deleteRawWithBody<T>(
+    path: string,
+    body?: unknown,
+    params?: Record<string, unknown>,
+  ): Promise<T> {
+    const response = await this.http.delete<T>(this.resolveRawPath(path), {data: body, params})
     return response.data
   }
 

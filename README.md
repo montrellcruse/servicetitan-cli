@@ -8,7 +8,7 @@
 >
 > Built by [**Rowvyn**](https://rowvyn.com) — [See the case study →](https://rowvyn.com/case-studies/servicetitan-cli)
 
-ServiceTitan CLI brings customer, job, invoice, dispatch, reporting, and operational intelligence workflows into a single `st` binary. It is built for developers, operators, and AI agents that need clean output, secure auth, fast scripting, and a reliable escape hatch when the named commands do not cover a niche endpoint yet.
+ServiceTitan CLI brings customer, job, invoice, dispatch, Sales template, reporting, and operational intelligence workflows into a single `st` binary. It is built for developers, operators, and AI agents that need clean output, secure auth, fast scripting, and a reliable escape hatch when the named commands do not cover a niche endpoint yet.
 
 <p align="center">
   <img src="demo.gif" alt="ServiceTitan CLI Demo" width="800">
@@ -106,12 +106,16 @@ Every command supports `--profile`, `--output table|json|csv`, `--compact`, and 
 | `st auth` | Login, logout, switch profiles, print token, whoami |
 | `st customers` | List, get, create, update customers and contacts |
 | `st jobs` | Book, list, get, update, cancel, and complete jobs |
+| `st jobs equipment` | View and manage installed equipment attached to jobs |
 | `st invoices` | List and get invoice records |
 | `st estimates` | List, get, sell, and unsell estimates |
+| `st estimate-templates` | List and get Sales estimate templates |
+| `st proposal-templates` | List and get Sales proposal templates |
+| `st proposal-types` | List Sales proposal type definitions |
 | `st leads` | List, get, convert, and dismiss leads |
 | `st bookings` | List, get, accept, and dismiss booking requests |
 | `st memberships` | List memberships, types, and recurring services |
-| `st appointments` | List and get job appointments |
+| `st appointments` | List, get, and set job appointment summaries |
 | `st dispatch` | View dispatch board, capacity, teams, zones, and assign technicians |
 | `st techs` | List and get technician profiles |
 | `st employees` | List and get employee records |
@@ -220,24 +224,25 @@ Inspect the operational core of the tenant: job queues, schedules, totals, and s
 ```text
 $ st jobs list --help
 USAGE
-  $ st jobs list [--output table|json|csv] [--profile <value>] [--color] [--compact] [--status <value>] [--date <value>] [--date-range <value>] [--page <value>] [--limit <value>] [--all] [--fields <value>]
+  $ st jobs list [--output table|json|csv] [--profile <value>] [--color] [--compact] [--status <value>] [--date <value>] [--date-range <value>] [--equipment-ids <value>] [--page <value>] [--limit <value>] [--all] [--fields <value>]
 
 FLAGS
-  --status=<value>      Comma-separated job statuses
-  --date=<value>        Exact date to filter by (YYYY-MM-DD)
-  --date-range=<value>  Date range to filter by (YYYY-MM-DD..YYYY-MM-DD)
-  --page=<value>        Page number to fetch (1-based)
-  --limit=<value>       Maximum number of jobs to return
-  --fields=<value>      Comma-separated fields to include
+  --status=<value>         Comma-separated job statuses
+  --date=<value>           Exact date to filter by (YYYY-MM-DD)
+  --date-range=<value>     Date range to filter by (YYYY-MM-DD..YYYY-MM-DD)
+  --equipment-ids=<value>  Comma-separated installed equipment IDs
+  --page=<value>           Page number to fetch (1-based)
+  --limit=<value>          Maximum number of jobs to return
+  --fields=<value>         Comma-separated fields to include
 ```
 
 ```bash
 $ st jobs list --status Scheduled,InProgress --date 2026-03-26 --limit 4
-Id      Status       Customer             Type                  Scheduled             Total
-845102  Scheduled    Johnson Family       Precision Tune-Up     2026-03-26T09:00:00Z 189
-845118  InProgress   Parkview Dental      RTU Cooling Repair    2026-03-26T10:30:00Z 1240
-845131  Scheduled    Bell Residence       Water Heater Replace  2026-03-26T13:00:00Z 0
-845144  Scheduled    Copper State Suites  Plumbing Inspection   2026-03-26T15:30:00Z 0
+Id      Status       Customer             Type                  Scheduled             Equipment Ids  Total
+845102  Scheduled    Johnson Family       Precision Tune-Up     2026-03-26T09:00:00Z []             189
+845118  InProgress   Parkview Dental      RTU Cooling Repair    2026-03-26T10:30:00Z [1001,1002]    1240
+845131  Scheduled    Bell Residence       Water Heater Replace  2026-03-26T13:00:00Z []             0
+845144  Scheduled    Copper State Suites  Plumbing Inspection   2026-03-26T15:30:00Z []             0
 ```
 
 ```bash
@@ -250,6 +255,7 @@ Type          RTU Cooling Repair
 Scheduled     2026-03-26T10:30:00Z
 Total         1240
 Summary       Rear rooftop package unit not cooling
+Summary Of Work Replaced capacitor and verified startup
 Business Unit Commercial HVAC
 Technician    Ava Thompson
 Created       2026-03-25T18:02:14Z
@@ -268,6 +274,23 @@ Body:
   "summary": "No cooling - upstairs system down",
   "locationId": 550912,
   "businessUnitId": 14
+}
+```
+
+```bash
+$ st jobs equipment get 845118
+Field         Value
+Equipment Ids [1001,1002]
+```
+
+```bash
+$ st jobs equipment attach 845118 --equipment-ids 1003 --dry-run
+[DRY RUN] POST https://api.servicetitan.io/jpm/v2/tenant/985798691/jobs/845118/equipment
+Body:
+{
+  "equipmentIds": [
+    1003
+  ]
 }
 ```
 
@@ -406,7 +429,7 @@ Id    Name                Duration  Price  Active
 
 ### estimates
 
-Review open and sold estimates without leaving the terminal.
+Review open and sold estimates without leaving the terminal, then inspect Sales estimate/proposal templates when planning catalog cleanup.
 
 ```bash
 $ st estimates list --status open --limit 3
@@ -509,6 +532,25 @@ Body:
   "status": "Dismissed",
   "reason": "Duplicate inquiry"
 }
+```
+
+```bash
+$ st estimate-templates list --active Any --limit 2
+Id   Name              Internal Name  Mode    Active  Business Unit Id  Total Price  Modified
+101  IAQ Good          IAQ-Good       Static  true    42                499          2026-05-15T00:00:00Z
+102  IAQ Better        IAQ-Better     Static  true    42                899          2026-05-15T00:00:00Z
+```
+
+```bash
+$ st proposal-templates list --proposal-type-id 301
+Id   Name               Status   Active  Proposal Type Id  Proposal Type Name  Modified
+201  Standard Proposal  Publish  true    301               Residential         2026-05-15T00:00:00Z
+```
+
+```bash
+$ st proposal-types list --active True
+Id   Name         Type     Active  Is Default  Is System Default
+301  Residential  Options  true    true        false
 ```
 
 ### pricebook

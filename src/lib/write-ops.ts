@@ -72,6 +72,32 @@ export function normalizeJobPriority(value: string | undefined): string | undefi
   return JOB_PRIORITY_MAP[value as keyof typeof JOB_PRIORITY_MAP]
 }
 
+export function parseIntegerList(value: string | undefined, label: string): number[] | undefined {
+  if (!value) {
+    return undefined
+  }
+
+  const ids = value
+    .split(',')
+    .map(entry => entry.trim())
+    .filter(Boolean)
+    .map(entry => {
+      const parsed = Number(entry)
+
+      if (!Number.isInteger(parsed) || parsed <= 0) {
+        throw new Error(`${label} must be a comma-separated list of positive integer IDs.`)
+      }
+
+      return parsed
+    })
+
+  if (ids.length === 0) {
+    throw new Error(`${label} must include at least one ID.`)
+  }
+
+  return ids
+}
+
 export function normalizeState(value: string | undefined): string | undefined {
   if (value === undefined) {
     return undefined
