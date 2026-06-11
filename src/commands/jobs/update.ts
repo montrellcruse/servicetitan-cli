@@ -16,6 +16,7 @@ const JOB_DETAIL_FIELDS = [
   'scheduled',
   'total',
   'summary',
+  'summaryOfWork',
   'businessUnit',
   'technician',
   'created',
@@ -28,6 +29,9 @@ export default class JobsUpdate extends BaseCommand {
     ...baseFlags,
     summary: Flags.string({
       description: 'Job summary',
+    }),
+    'summary-of-work': Flags.string({
+      description: 'Summary of work completed on the job',
     }),
     priority: Flags.string({
       description: 'Job priority',
@@ -70,6 +74,7 @@ export default class JobsUpdate extends BaseCommand {
     const path = `/jobs/${jobId}`
     const body = buildRequestBody([
       ['summary', flags.summary],
+      ['summaryOfWork', flags['summary-of-work']],
       ['priority', normalizeJobPriority(flags.priority)],
       ['status', flags.status],
       ['technicianId', flags.tech],

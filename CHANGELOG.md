@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-10
+
+### Added
+- `st jobs equipment get|attach|detach|detach-bulk` for ServiceTitan ST-77 job equipment links, with write/delete operations protected by confirmation and `--dry-run`.
+- `st appointments set-summary` for the ST-77 private-preview appointment summary endpoint.
+- `st estimate-templates list|get`, `st proposal-templates list|get`, and `st proposal-types list` for ST-77.2 Sales template discovery.
+- `st jobs list --equipment-ids` and `st jobs update --summary-of-work`.
+- `st api delete --body` for DELETE endpoints that require a JSON request body.
+
+### Changed
+- Job, appointment, and job type output now exposes new ST-77 fields such as equipment IDs, appointment summaries, job type custom field IDs, and default estimate-sold action.
+
 ## [0.3.8] - 2026-06-07
 
 ### Fixed
@@ -171,7 +183,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Keytar-based credential storage in OS keychain
 - Integration and production environment support
 
-[Unreleased]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.3.8...HEAD
+[Unreleased]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.3.8...v0.4.0
 [0.3.8]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.3.7...v0.3.8
 [0.3.7]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.3.4...v0.3.7
 [0.2.3]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.2.2...v0.2.3

@@ -38,6 +38,9 @@ describe('ServiceTitanClient path resolution', () => {
     ['/appointment-assignments', 'dispatch'],
     ['/invoices', 'accounting'],
     ['/estimates', 'sales'],
+    ['/estimate-templates', 'sales'],
+    ['/proposal-templates', 'sales'],
+    ['/proposal-types', 'sales'],
     ['/services', 'pricebook'],
     ['/payrolls', 'payroll'],
     ['/memberships', 'memberships'],
@@ -56,6 +59,21 @@ describe('ServiceTitanClient path resolution', () => {
     expect(client.addApiPrefix('/timesheets/v2/tenant/12345/activities')).toBe(
       '/timesheets/v2/tenant/12345/activities',
     )
+  })
+
+  it('sends DELETE requests with a JSON body', async () => {
+    const client = createClient()
+    const privateClient = client as unknown as PrivateClient
+    const deleteSpy = vi.spyOn(privateClient.http, 'delete').mockResolvedValue({data: {ok: true}})
+
+    await expect(
+      client.deleteWithBody('/jobs/123/equipment', {equipmentIds: [10, 11]}),
+    ).resolves.toEqual({ok: true})
+
+    expect(deleteSpy).toHaveBeenCalledWith('/jpm/v2/tenant/12345/jobs/123/equipment', {
+      data: {equipmentIds: [10, 11]},
+      params: undefined,
+    })
   })
 })
 
@@ -167,6 +185,7 @@ function create429Error(options: {retryAfter?: string; retryCount?: number} = {}
 interface PrivateClient {
   handleResponseError: (error: AxiosError) => Promise<unknown>
   http: {
+    delete: (...args: unknown[]) => Promise<unknown>
     get: (...args: unknown[]) => Promise<unknown>
     request: (...args: unknown[]) => Promise<unknown>
   }

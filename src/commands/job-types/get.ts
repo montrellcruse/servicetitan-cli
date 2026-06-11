@@ -12,6 +12,9 @@ export default class JobTypesGet extends BaseCommand {
     full: Flags.boolean({
       description: 'Return the full API response',
     }),
+    fields: Flags.string({
+      description: 'Comma-separated fields to include',
+    }),
   }
 
   public static override args = {
@@ -34,7 +37,10 @@ export default class JobTypesGet extends BaseCommand {
     const record = flags.full ? jobType : toJobTypeSummary(jobType)
 
     await this.renderRecord(record, {
-      defaultFields: flags.full ? undefined : ['id', 'name', 'duration', 'active'],
+      defaultFields: flags.full
+        ? undefined
+        : ['id', 'name', 'duration', 'active', 'defaultEstimateSoldAction', 'customFieldTypeIds'],
+      fields: this.parseFields(flags.fields),
     })
   }
 }

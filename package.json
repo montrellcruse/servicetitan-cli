@@ -1,6 +1,6 @@
 {
   "name": "@rowvyn/servicetitan-cli",
-  "version": "0.3.8",
+  "version": "0.4.0",
   "description": "ServiceTitan CLI",
   "author": "Montrell Cruse <montrell@rowvyn.com>",
   "license": "MIT",
@@ -85,6 +85,9 @@
       "jobs": {
         "description": "Book, search, update, cancel, and complete service jobs"
       },
+      "jobs equipment": {
+        "description": "View and manage installed equipment attached to jobs"
+      },
       "job-types": {
         "description": "View job types used for booking and ID resolution"
       },
@@ -108,6 +111,15 @@
       },
       "estimates": {
         "description": "View and search estimate records"
+      },
+      "estimate-templates": {
+        "description": "View Sales estimate templates"
+      },
+      "proposal-templates": {
+        "description": "View Sales proposal templates"
+      },
+      "proposal-types": {
+        "description": "View Sales proposal types"
       },
       "leads": {
         "description": "Manage incoming leads, dismiss them, or convert them to booked jobs"

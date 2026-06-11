@@ -82,6 +82,7 @@ export default class AppointmentsList extends BaseCommand {
         'arrivalWindowEnd',
         'status',
         'isConfirmed',
+        'appointmentSummaries',
       ],
     })
   }

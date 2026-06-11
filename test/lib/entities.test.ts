@@ -32,10 +32,12 @@ describe('entity mappers', () => {
       businessUnit: '',
       created: '',
       customer: '',
+      equipmentIds: [],
       id: '',
       scheduled: '',
       status: '',
       summary: '',
+      summaryOfWork: '',
       technician: '',
       total: 0,
       type: '',
@@ -65,6 +67,7 @@ describe('entity mappers', () => {
 
     expect(toAppointmentSummary({})).toEqual({
       appointmentNumber: '',
+      appointmentSummaries: [],
       arrivalWindowEnd: '',
       arrivalWindowStart: '',
       end: '',
@@ -103,6 +106,7 @@ describe('entity mappers', () => {
       }),
     ).toEqual({
       customer: '9912',
+      equipmentIds: [],
       id: 845118,
       scheduled: '2026-03-26T10:30:00Z',
       status: 'Scheduled',

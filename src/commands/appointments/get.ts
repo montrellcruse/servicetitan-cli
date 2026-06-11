@@ -14,6 +14,7 @@ const APPOINTMENT_FIELDS = [
   'arrivalWindowEnd',
   'status',
   'isConfirmed',
+  'appointmentSummaries',
 ]
 
 export default class AppointmentsGet extends BaseCommand {

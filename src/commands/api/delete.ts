@@ -1,6 +1,6 @@
 import {Args, Flags} from '@oclif/core'
 
-import {parseParamsFlag} from '../../lib/api.js'
+import {parseParamsFlag, parseRequestBody} from '../../lib/api.js'
 import {BaseCommand, baseFlags} from '../../lib/base-command.js'
 import {printDryRun, printSuccess} from '../../lib/output.js'
 import {confirmAction} from '../../lib/prompts.js'
@@ -13,6 +13,9 @@ export default class ApiDelete extends BaseCommand {
     ...baseFlags,
     params: Flags.string({
       description: 'Comma-separated key=value query parameters',
+    }),
+    body: Flags.string({
+      description: 'JSON request body',
     }),
     yes: Flags.boolean({
       description: 'Skip the confirmation prompt',
@@ -40,8 +43,10 @@ export default class ApiDelete extends BaseCommand {
 
     const resolvedPath = this.requireClient().resolveRawPath(path)
 
+    const body = flags.body ? parseRequestBody(flags.body) : undefined
+
     if (flags['dry-run']) {
-      printDryRun('DELETE', resolvedPath)
+      printDryRun('DELETE', resolvedPath, body)
       return
     }
 
@@ -51,7 +56,11 @@ export default class ApiDelete extends BaseCommand {
       return
     }
 
-    const response = await this.requireClient().deleteRaw<unknown>(path, parseParamsFlag(flags.params))
+    const params = parseParamsFlag(flags.params)
+    const response =
+      body === undefined
+        ? await this.requireClient().deleteRaw<unknown>(path, params)
+        : await this.requireClient().deleteRawWithBody<unknown>(path, body, params)
 
     if (!hasResponseBody(response)) {
       printSuccess('DELETE request succeeded.')
