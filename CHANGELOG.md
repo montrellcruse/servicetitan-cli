@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-06-27
+
+### Fixed
+- Published the dependency audit cleanup from `main`, including patched transitive `form-data` resolution and the upgraded `@oclif/core` / `js-yaml` path for new npm installs.
+
 ## [0.4.0] - 2026-06-10
 
 ### Added
@@ -183,7 +188,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Keytar-based credential storage in OS keychain
 - Integration and production environment support
 
-[Unreleased]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.3.8...v0.4.0
 [0.3.8]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.3.7...v0.3.8
 [0.3.7]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.3.4...v0.3.7
