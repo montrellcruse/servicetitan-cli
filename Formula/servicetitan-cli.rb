@@ -1,8 +1,11 @@
+# frozen_string_literal: true
+
+# Installs the ServiceTitan API command-line client.
 class ServicetitanCli < Formula
   desc "First-party quality CLI for the ServiceTitan API"
   homepage "https://github.com/montrellcruse/servicetitan-cli"
-  url "https://registry.npmjs.org/@rowvyn/servicetitan-cli/-/servicetitan-cli-0.4.1.tgz"
-  sha256 "61c01eeee91286229c72970deeab30dcc08097cb44d83f2a59e06ff33dd73e41"
+  url "https://registry.npmjs.org/@rowvyn/servicetitan-cli/-/servicetitan-cli-0.4.2.tgz"
+  sha256 "9ee1f0b7ff5a6176793ffb355ccb3bc5498ead7ae587d75519b8c37e3495380d"
   license "MIT"
 
   depends_on "node"
@@ -14,6 +17,6 @@ class ServicetitanCli < Formula
 
   test do
     output = shell_output("#{bin}/st --version")
-    assert_match "0.4.1", output
+    assert_match "0.4.2", output
   end
 end
