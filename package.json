@@ -1,6 +1,6 @@
 {
   "name": "@rowvyn/servicetitan-cli",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "ServiceTitan CLI",
   "author": "Montrell Cruse <montrell@rowvyn.com>",
   "license": "MIT",
@@ -30,7 +30,8 @@
     "!dist/__mocks__",
     "README.md",
     "CHANGELOG.md",
-    "LICENSE"
+    "LICENSE",
+    "npm-shrinkwrap.json"
   ],
   "exports": "./dist/index.js",
   "engines": {
@@ -39,7 +40,7 @@
   "dependencies": {
     "@oclif/core": "^4.11.11",
     "@oclif/plugin-help": "^6.0.0",
-    "axios": "^1.17.0",
+    "axios": "^1.18.1",
     "chalk": "^5.4.1",
     "cli-table3": "^0.6.5",
     "csv-stringify": "^6.5.2",

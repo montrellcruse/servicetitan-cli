@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-07-22
+
+### Fixed
+- Raised the Axios dependency floor to `1.18.1` to close the current proxy, authentication, form serialization, `NO_PROXY`, and HTTP/2 upload advisories.
+- Published the CLI's tested dependency tree through `npm-shrinkwrap.json` so installs receive patched brace-expansion versions instead of relying on a repository-only lockfile.
+- Added an npm audit gate to pull request, `main`, and release workflows so moderate-or-higher dependency regressions block shipping.
+
 ## [0.4.1] - 2026-06-27
 
 ### Fixed
@@ -188,7 +195,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Keytar-based credential storage in OS keychain
 - Integration and production environment support
 
-[Unreleased]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.3.8...v0.4.0
 [0.3.8]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.3.7...v0.3.8
