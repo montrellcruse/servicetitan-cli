@@ -1,6 +1,6 @@
 {
   "name": "@rowvyn/servicetitan-cli",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "ServiceTitan CLI",
   "author": "Montrell Cruse <montrell@rowvyn.com>",
   "license": "MIT",
@@ -38,8 +38,8 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
-    "@oclif/core": "^4.11.11",
-    "@oclif/plugin-help": "^6.0.0",
+    "@oclif/core": "^4.13.5",
+    "@oclif/plugin-help": "^6.2.55",
     "axios": "^1.18.1",
     "chalk": "^5.4.1",
     "cli-table3": "^0.6.5",
@@ -49,13 +49,15 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^22.10.2",
-    "@typescript-eslint/eslint-plugin": "^8.18.2",
-    "@typescript-eslint/parser": "^8.18.2",
-    "@vitest/coverage-v8": "^4.1.8",
-    "eslint": "^8.57.1",
+    "@typescript-eslint/eslint-plugin": "^8.65.0",
+    "@typescript-eslint/parser": "^8.65.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "eslint": "^10.8.0",
+    "globals": "^17.8.0",
     "typescript": "^5.7.2",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.10"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

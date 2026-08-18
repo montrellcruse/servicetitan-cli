@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-08-17
+
+### Fixed
+- Upgraded Oclif and its help plugin, and pinned Oclif's EJS renderer to the compatible patched EJS 6 release, removing the vulnerable Jake/filelist dependency chain from published installs.
+- Upgraded minimatch and brace-expansion to patched releases.
+- Migrated the development toolchain to ESLint 10 and refreshed Vitest/Vite/PostCSS so repository and production audits both report zero vulnerabilities.
+- Preserved caught authentication and configuration errors as `cause` values while keeping the CLI's existing user-facing messages.
+
 ## [0.4.2] - 2026-07-22
 
 ### Fixed
@@ -195,7 +203,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Keytar-based credential storage in OS keychain
 - Integration and production environment support
 
-[Unreleased]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.4.3...HEAD
+[0.4.3]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/montrellcruse/servicetitan-cli/compare/v0.3.8...v0.4.0

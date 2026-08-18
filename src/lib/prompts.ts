@@ -11,7 +11,6 @@ export async function promptText(
   })
 
   try {
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       const suffix = options.defaultValue ? ` [${options.defaultValue}]` : ''
       const answer = await rl.question(`${label}${suffix}: `)

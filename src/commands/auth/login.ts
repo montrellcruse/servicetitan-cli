@@ -62,12 +62,14 @@ export default class AuthLogin extends BaseCommand {
       if (error instanceof ServiceTitanApiError) {
         if (error.status === 401) {
           throw new Error(
-            'Authentication failed. Verify your Client ID, Client Secret, and App Key are correct for the selected environment.'
+            'Authentication failed. Verify your Client ID, Client Secret, and App Key are correct for the selected environment.',
+            {cause: error},
           )
         }
         if (error.status === 403) {
           throw new Error(
-            'Access denied. Your App Key may not be authorized for this tenant, or the tenant ID is incorrect.'
+            'Access denied. Your App Key may not be authorized for this tenant, or the tenant ID is incorrect.',
+            {cause: error},
           )
         }
       }

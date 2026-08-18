@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {afterEach, describe, expect, it, vi} from 'vitest'
 import {AxiosHeaders, type AxiosError} from 'axios'
 
