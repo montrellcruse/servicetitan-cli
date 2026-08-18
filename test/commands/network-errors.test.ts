@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {afterEach, describe, expect, it, vi} from 'vitest'
 import {AxiosHeaders, type AxiosError} from 'axios'
 
@@ -59,7 +58,7 @@ describe('ServiceTitanClient network errors', () => {
       // No `response` — pure network failure
       response: undefined,
       toJSON: () => ({}),
-    } as unknown as AxiosError
+    }
   }
 
   /** Build an HTTP error with a response body */
@@ -86,7 +85,7 @@ describe('ServiceTitanClient network errors', () => {
         statusText,
       },
       toJSON: () => ({}),
-    } as unknown as AxiosError
+    }
   }
 
   // ─── 1. Request timeout ──────────────────────────────────────────────────
@@ -230,7 +229,7 @@ describe('ServiceTitanClient network errors', () => {
     ).catch((e: unknown) => e as Error)
 
     expect(err).toBeInstanceOf(ServiceTitanApiError)
-    expect((err as ServiceTitanApiError).path).toContain('/customers')
+    expect(err.path).toContain('/customers')
   })
 
   it('uses "unknown path" when config is missing', async () => {
@@ -243,7 +242,7 @@ describe('ServiceTitanClient network errors', () => {
       name: 'AxiosError',
       response: undefined,
       toJSON: () => ({}),
-    } as unknown as AxiosError
+    }
 
     const err = await handleError(client, noConfigError).catch((e: unknown) => e as Error)
     expect(err).toBeInstanceOf(ServiceTitanApiError)

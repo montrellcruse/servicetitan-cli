@@ -62,7 +62,7 @@ export async function getConfig(): Promise<ConfigFile> {
     }
 
     if (error instanceof z.ZodError) {
-      throw new Error(`Invalid config file at ${configPath}: ${error.message}`)
+      throw new Error(`Invalid config file at ${configPath}: ${error.message}`, {cause: error})
     }
 
     throw error
