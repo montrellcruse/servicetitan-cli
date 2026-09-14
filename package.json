@@ -29,6 +29,9 @@
     "dist",
     "!dist/__mocks__",
     "README.md",
+    "ARCHITECTURE.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
     "CHANGELOG.md",
     "LICENSE",
     "npm-shrinkwrap.json"
@@ -38,24 +41,24 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
-    "@oclif/core": "^4.13.5",
-    "@oclif/plugin-help": "^6.2.55",
-    "axios": "^1.18.1",
+    "@oclif/core": "^4.14.0",
+    "@oclif/plugin-help": "^6.3.0",
+    "axios": "^1.20.0",
     "chalk": "^5.4.1",
     "cli-table3": "^0.6.5",
-    "csv-stringify": "^6.5.2",
+    "csv-stringify": "^6.8.3",
     "keytar": "^7.9.0",
     "ora": "^8.1.1",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/node": "^22.10.2",
-    "@typescript-eslint/eslint-plugin": "^8.65.0",
-    "@typescript-eslint/parser": "^8.65.0",
+    "@types/node": "^22.20.2",
+    "@typescript-eslint/eslint-plugin": "^8.70.0",
+    "@typescript-eslint/parser": "^8.70.0",
     "@vitest/coverage-v8": "^4.1.11",
-    "eslint": "^10.8.0",
-    "globals": "^17.8.0",
+    "eslint": "^10.10.0",
+    "globals": "^17.12.0",
     "typescript": "^5.7.2",
     "vitest": "^4.1.11"
   },
