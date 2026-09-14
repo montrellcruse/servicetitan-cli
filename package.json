@@ -1,6 +1,7 @@
 {
   "name": "@rowvyn/servicetitan-cli",
   "version": "0.4.3",
+  "packageManager": "npm@11.19.1",
   "description": "ServiceTitan CLI",
   "author": "Montrell Cruse <montrell@rowvyn.com>",
   "license": "MIT",
