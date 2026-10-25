@@ -18,7 +18,7 @@ const configSchema = z.object({
   output: z.enum(['table', 'json', 'csv']),
   color: z.boolean(),
   compact: z.boolean(),
-  profiles: z.record(profileSchema),
+  profiles: z.record(z.string(), profileSchema),
 })
 
 const DEFAULT_CONFIG: ConfigFile = {
