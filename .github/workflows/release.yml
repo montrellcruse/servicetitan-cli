@@ -4,24 +4,48 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Existing version tag to recover, for example v0.4.4'
+        required: true
+        type: string
+
+permissions:
+  contents: read
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
+          fetch-depth: 0
       - uses: actions/setup-node@v7
         with:
           node-version: '22.x'
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
+      - name: Use the pinned publisher npm
+        run: npm install --global npm@11.19.1
+      - name: Verify release identity
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
+        run: |
+          git show-ref --verify "refs/tags/${RELEASE_TAG}"
+          test "$(git rev-parse HEAD)" = "$(git rev-parse "refs/tags/${RELEASE_TAG}^{commit}")"
+          node --input-type=module -e 'import fs from "node:fs"; const p=JSON.parse(fs.readFileSync("package.json")); if(process.env.RELEASE_TAG!==`v${p.version}`) process.exit(1);'
       - name: Install keytar build dependencies
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       - run: npm run verify:lockfiles
       - run: npm ci
       - run: npm audit --audit-level=moderate
       - run: npm run build
-      - name: Publish to npm (skip if version already exists)
+      - name: Publish using npm Trusted Publishing (skip if version already exists)
         run: |
           PKG_VERSION=$(node -p "require('./package.json').version")
           PKG_NAME=$(node -p "require('./package.json').name")
@@ -30,5 +54,3 @@ jobs:
           else
             npm publish --access public
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
