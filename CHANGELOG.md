@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [0.4.4] - 2026-10-25
+
+### Fixed
+- Updated runtime and test dependencies to include the security fixes merged since 0.4.3, with matching package-lock and shrinkwrap files.
+- Moved configuration validation to Zod 4.6.6 while preserving the existing accepted configuration shapes and user-facing errors.
+
+### Changed
+- Pinned maintainer packaging to npm 11.19.1 for reproducible shrinkwrap handling.
+
 ## [0.4.3] - 2026-08-17
 
 ### Fixed
