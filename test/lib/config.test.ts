@@ -1,4 +1,4 @@
-import {mkdtemp, rm, stat} from 'node:fs/promises'
+import {mkdtemp, rm, stat, writeFile} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 
@@ -42,6 +42,30 @@ describe('config', () => {
       tenantId: '42',
     })
     expect(await getActiveProfileName()).toBe('demo')
+  })
+
+  it('reads existing version-1 configs with arbitrary profile names and strips unknown fields', async () => {
+    const profile = {appKey: 'fixture-key', environment: 'integration', tenantId: '42'}
+    await writeFile(getConfigPath(), JSON.stringify({
+      version: '1', default: 'crew west/2', output: 'csv', color: false, compact: true,
+      profiles: {'crew west/2': {...profile, legacy: true}, '': profile}, legacy: true,
+    }))
+
+    expect(await getConfig()).toEqual({
+      version: '1', default: 'crew west/2', output: 'csv', color: false, compact: true,
+      profiles: {'crew west/2': profile, '': profile},
+    })
+    await saveConfig(await getConfig())
+    expect((await getConfig()).profiles['crew west/2']).toEqual(profile)
+  })
+
+  it('reports invalid existing profile values as config validation errors', async () => {
+    await writeFile(getConfigPath(), JSON.stringify({
+      version: '1', default: 'demo', output: 'table', color: true, compact: false,
+      profiles: {demo: {appKey: 'fixture-key', environment: 'integration', tenantId: ''}},
+    }))
+
+    await expect(getConfig()).rejects.toThrow(/Invalid config file.*tenantId/s)
   })
 
   it('writes and reads the full config shape', async () => {
